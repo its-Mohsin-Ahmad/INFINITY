@@ -20,7 +20,7 @@ import {
 import { Countdown, Tabs } from "@/components/ui/interactive";
 import { AddToCartButton, CompareButton, WishlistButton } from "@/components/player/player-actions";
 import { RecentlyViewedRail, ViewedTracker } from "@/components/player/recently-viewed";
-import { discountedPrice } from "@/lib/generate";
+import { discountedPrice, slugify } from "@/lib/generate";
 import type { RequirementRow } from "@/lib/types";
 
 /* ===========================================================================
@@ -122,7 +122,7 @@ export default async function GamePage({ params }: GamePageProps) {
               {game.tagline ? <p className="mt-2 text-sm text-ink-secondary">{game.tagline}</p> : null}
 
               <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink-muted">
-                <Link href={`/studios/${encodeURIComponent(game.developer)}`} className="hover:text-accent">
+                <Link href={`/studios/${slugify(game.developer)}`} className="hover:text-accent">
                   {game.developer}
                 </Link>
                 <span className="text-line-strong">|</span>
@@ -429,17 +429,17 @@ export default async function GamePage({ params }: GamePageProps) {
 
             <Panel title="More from this studio" className="p-5">
               <Link
-                href={`/studios/${encodeURIComponent(game.developer)}`}
+                href={`/studios/${slugify(game.developer)}`}
                 className="font-display text-sm font-bold uppercase tracking-wide text-white hover:text-accent"
               >
                 {game.developer}
               </Link>
               <p className="mt-1 text-xs text-ink-muted">Publisher: {game.publisher}</p>
               <Link
-                href={`/games?developer=${encodeURIComponent(game.developer)}`}
+                href={`/studios/${slugify(game.developer)}`}
                 className="mt-4 inline-flex border border-line px-3 py-1.5 font-display text-2xs font-bold uppercase tracking-[0.14em] text-ink-secondary transition hover:border-accent hover:text-white"
               >
-                View catalogue
+                Studio catalogue
               </Link>
             </Panel>
           </aside>
@@ -450,7 +450,7 @@ export default async function GamePage({ params }: GamePageProps) {
             eyebrow="Players also exploring"
             title="Similar games"
             games={similar}
-            href={`/games?genre=${game.genre[0]}`}
+            href={`/categories/${game.genre[0]}`}
             linkLabel={genres[0] ? `More ${genres[0]}` : "Browse all"}
           />
           <RecentlyViewedRail titles={TITLE_INDEX} exclude={game.slug} />

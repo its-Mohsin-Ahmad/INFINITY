@@ -21,10 +21,17 @@ const REMOTE = process.env.PAGES_REMOTE ?? "https://github.com/its-Mohsin-Ahmad/
 const BRANCH = process.env.PAGES_BRANCH ?? "gh-pages";
 
 function git(args, cwd) {
-  const result = spawnSync("git", args, {
+  // On Windows the helper spawns through cmd.exe (shell: true), which splits
+  // unquoted arguments on spaces — the commit message must be re-quoted or it
+  // arrives at git as a list of bogus pathspecs.
+  const isWin = process.platform === "win32";
+  const safeArgs = isWin
+    ? args.map((a) => (/[\s"]/g.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a))
+    : args;
+  const result = spawnSync("git", safeArgs, {
     cwd,
     stdio: "inherit",
-    shell: process.platform === "win32",
+    shell: isWin,
   });
   if (result.status !== 0) {
     console.error(`\n[infinity] git ${args.join(" ")} failed`);

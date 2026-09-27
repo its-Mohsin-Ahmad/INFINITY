@@ -12,6 +12,7 @@ import {
 import { computeStats } from "@/lib/catalogue";
 import { Stat } from "@/components/ui/primitives";
 import { ProgressBar } from "@/components/ui/interactive";
+import { slugify } from "@/lib/generate";
 
 /* ===========================================================================
  * Homepage sections (server components — no client JS unless imported below)
@@ -263,7 +264,7 @@ export function PulseBoard() {
                 {devs.map((d) => (
                   <li key={d.name} className="flex items-center justify-between gap-3 text-xs">
                     <Link
-                      href={`/studios/${encodeURIComponent(d.name)}`}
+                      href={`/studios/${slugify(d.name)}`}
                       className="truncate text-ink-secondary transition hover:text-accent"
                     >
                       {d.name}
