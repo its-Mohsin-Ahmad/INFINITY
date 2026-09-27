@@ -76,6 +76,7 @@ Requirements: **Node.js >= 20.9**.
 | `npm run dev` | Development server (restores the `/api` routes first) |
 | `npm run build` | Production **server** build → `npm start` |
 | `npm run build:static` | **Static export** for GitHub Pages → `./out` |
+| `npm run deploy:pages` | Static export **and** publish it to the `gh-pages` branch |
 | `npm start` | Serve the server build |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run verify` | Deterministic catalogue verification (fails on any data regression) |
@@ -113,8 +114,27 @@ INFINITY compiles in two modes, selected by `NEXT_OUTPUT`:
 
 ## Deploying to GitHub Pages
 
-The workflow **`.github/workflows/deploy-pages.yml`** runs on every push to
-`main` and on manual dispatch:
+The site is live at **<https://its-mohsin-ahmad.github.io/INFINITY/>**.
+
+There are two deployment paths. Both build the same `./out` bundle.
+
+### A. Branch deploy (no extra permissions) — current setup
+
+```bash
+npm run deploy:pages     # static export + publish ./out to the gh-pages branch
+```
+
+`scripts/deploy-pages.mjs` creates a fresh orphan history in `./out` and
+force-pushes it to `gh-pages`, so the branch never accumulates old builds. The
+repository's Pages source is set to that branch (Settings → Pages → Source:
+*Deploy from a branch* → `gh-pages` / `/ (root)`).
+
+> Rebuilds are needed for catalogue or design changes — the branch deploy has no
+> runtime, so a rebuild is the only way to publish.
+
+### B. GitHub Actions (recommended once the token allows it)
+
+`.github/workflows/deploy-pages.yml` builds and deploys on every push to `main`:
 
 1. `npm ci`
 2. `npm run typecheck`
@@ -123,16 +143,21 @@ The workflow **`.github/workflows/deploy-pages.yml`** runs on every push to
 5. `touch out/.nojekyll`
 6. Upload `./out` as the Pages artifact and deploy to the `github-pages` environment
 
-**One-time repository setup**
+**Why it is not active yet:** pushing a workflow file requires an OAuth token
+with the `workflow` scope. Grant it once and the pipeline takes over:
 
-1. **Settings → Pages → Build and deployment → Source: _GitHub Actions_**
-   (or run `gh api -X POST repos/its-Mohsin-Ahmad/INFINITY/pages -f build_type=workflow`).
-2. Make sure the repository default branch is `main`.
+```bash
+gh auth refresh -h github.com -s workflow
+```
 
-The site is then served from
-`https://<owner>.github.io/INFINITY/` — if you later move the site to a user or
-custom domain, set `NEXT_PUBLIC_BASE_PATH` to `""` (user site) in the workflow
-environment.
+Then commit the workflow and flip the Pages source back to *GitHub Actions*:
+
+```bash
+git add .github/workflows/deploy-pages.yml
+git commit -m "ci: deploy to GitHub Pages on every push"
+git push
+gh api -X PUT repos/its-Mohsin-Ahmad/INFINITY/pages -f build_type=workflow
+```
 
 Watch a deployment:
 
@@ -140,6 +165,10 @@ Watch a deployment:
 gh run list --repo its-Mohsin-Ahmad/INFINITY
 gh run watch --repo its-Mohsin-Ahmad/INFINITY
 ```
+
+**Base path:** the export defaults to `basePath: "/INFINITY"`. To serve from a
+user site or a custom domain instead, set `NEXT_PUBLIC_BASE_PATH=""` (user site)
+in the deploy environment.
 
 ---
 

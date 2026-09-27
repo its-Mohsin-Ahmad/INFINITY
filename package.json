@@ -7,6 +7,7 @@
     "dev": "node scripts/prepare-api.mjs && next dev",
     "build": "node scripts/infinity-build.mjs",
     "build:static": "node scripts/infinity-build.mjs --static",
+    "deploy:pages": "node scripts/infinity-build.mjs --static && node scripts/deploy-pages.mjs",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "verify": "node scripts/verify-database.mjs"
