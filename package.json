@@ -10,7 +10,8 @@
     "deploy:pages": "node scripts/infinity-build.mjs --static && node scripts/deploy-pages.mjs",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "verify": "node scripts/verify-database.mjs"
+    "verify": "node scripts/verify-database.mjs",
+    "fetch:art": "node scripts/fetch-steam-art.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

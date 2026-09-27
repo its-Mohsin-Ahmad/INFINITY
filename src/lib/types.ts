@@ -187,6 +187,8 @@ export interface Game {
   /** Optional licensed artwork. When null the key-art engine renders a poster. */
   coverImage: string | null;
   heroImage: string | null;
+  /** 460x215 landscape art for list rows, rails and tiles. */
+  headerImage: string | null;
   screenshots: ScreenshotAsset[];
   videos: VideoAsset[];
   genre: GenreSlug[];

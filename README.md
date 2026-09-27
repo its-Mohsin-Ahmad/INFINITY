@@ -216,12 +216,31 @@ The script exits non-zero on any regression, so it runs as a CI gate.
 
 ---
 
+## Artwork
+
+Visuals are served by `src/components/art/ArtImage.tsx`, which prefers real
+photography and always has a generated fallback:
+
+1. `npm run fetch:art` (`scripts/fetch-steam-art.mjs`) maps every catalogue
+   title to a storefront app id, verifies which image assets actually resolve,
+   and writes `src/data/steam-art.ts`. Matching is exact-title only, so a wrong
+   cover can never be attached; results are cached in
+   `scripts/.steam-art-cache.json` and re-runs only retry the misses.
+2. The catalogue build fills `coverImage` (2:3 box art), `heroImage` (ultra-wide
+   banner) and `headerImage` (landscape) from that index.
+3. `ArtImage` renders the photo and swaps in the `GameArt` SVG engine when a
+   title is console/mobile-only, when the image is blocked or offline, or when
+   `STEAM_ART_ENABLED` in `src/data/steam-art.ts` is flipped to `false`.
+
+Box art is hotlinked from the public storefront CDN, so it is never
+redistributed, and every page still renders without it.
+
+---
+
 ## Design notes & limitations
 
-- **All artwork is generated.** `GameArt` renders deterministic SVG from the
-  game's slug and genre, so nothing is scraped or hotlinked. An authorised CDN
-  image can be attached later through `coverImage`/`heroImage`; the `<img>` path
-  is used automatically when present.
+- **Artwork is real where it can be, generated where it cannot.** See
+  [Artwork](#artwork) above for the resolver, the fallback and the kill switch.
 - **Static hosts cannot run route handlers.** On the Pages build, cart pricing
   falls back to the shared rule in the browser (see
   `src/lib/commerce/cart-line.ts`) and the newsletter opt-in is stored locally.

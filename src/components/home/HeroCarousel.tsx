@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { ChevronRight, Play, Star } from "lucide-react";
 import type { Game } from "@/lib/types";
-import { GameArt } from "@/components/art/GameArt";
+import { ArtImage } from "@/components/art/ArtImage";
 import { Badge, PlatformPills, PriceTag } from "@/components/ui/primitives";
 import { AddToCartButton, WishlistButton } from "@/components/player/player-actions";
 import { genreName } from "@/data/taxonomy";
@@ -46,11 +46,18 @@ export function HeroCarousel({ games }: { games: Game[] }) {
     >
       <div key={game.slug} className="absolute inset-0 animate-fade-in">
         <div className="h-full w-full animate-kenburns">
-          <GameArt game={game} variant="hero" showTitle={false} className="h-full w-full object-cover" />
+          <ArtImage
+            game={game}
+            variant="hero"
+            showTitle={false}
+            eager
+            className="h-full w-full object-cover"
+          />
         </div>
       </div>
-      <div className="absolute inset-0 bg-gradient-to-r from-bg-deep via-bg-deep/90 to-bg-deep/30" />
-      <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-bg-deep/60" />
+      {/* legibility: real key art is bright, so the copy side is darkened hard */}
+      <div className="absolute inset-0 bg-gradient-to-r from-bg-deep via-bg-deep/92 to-bg-deep/25" />
+      <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-bg-deep/70" />
       <div className="aura-accent absolute inset-0" />
 
       <div className="shell relative flex min-h-[520px] flex-col justify-end gap-8 pb-10 pt-14 lg:min-h-[620px] lg:flex-row lg:items-end lg:justify-between lg:pb-14">
@@ -126,7 +133,7 @@ export function HeroCarousel({ games }: { games: Game[] }) {
                 i === index ? "border-accent" : "border-line opacity-60 hover:opacity-100",
               )}
             >
-              <GameArt game={item} variant="thumb" showTitle={false} className="h-full w-full" />
+              <ArtImage game={item} variant="thumb" showTitle={false} className="h-full w-full" />
               <span className="relative w-full truncate bg-gradient-to-t from-bg-deep to-transparent px-2 pb-1.5 pt-4 text-left font-display text-2xs font-bold uppercase tracking-wider text-white">
                 {item.title}
               </span>

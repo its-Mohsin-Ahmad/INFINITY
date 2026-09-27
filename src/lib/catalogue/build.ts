@@ -9,6 +9,7 @@ import type {
 } from "@/lib/types";
 import type { RawGameRow } from "@/data/game-records";
 import { GENRE_MAP, PLATFORM_MAP, SUBGENRE_MAP } from "@/data/taxonomy";
+import { steamArtFor } from "@/data/steam-art";
 import {
   hashString,
   seededInt,
@@ -415,6 +416,9 @@ export function buildGame(row: RawGameRow): Game {
   const shots = screenshotsFor(row, slug);
   const vids = videosFor(row, slug, row.publisher);
   const primaryGenre = row.genres[0] ?? "action";
+  // Real box art when the resolver matched a storefront entry, else null so
+  // the UI falls back to the generated key-art engine.
+  const art = steamArtFor(slug);
 
   const availability: PlatformAvailability[] = row.platforms.map((platform) => {
     const store = officialStoreUrl(platform, row.title);
@@ -444,8 +448,9 @@ export function buildGame(row: RawGameRow): Game {
     slug,
     shortDescription: shortDescriptionFor(row, slug),
     longDescription: long.join("\n\n"),
-    coverImage: null,
-    heroImage: null,
+    coverImage: art?.poster ?? null,
+    heroImage: art?.hero ?? null,
+    headerImage: art?.header ?? null,
     screenshots: shots,
     videos: vids,
     genre: row.genres,

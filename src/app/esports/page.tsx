@@ -9,6 +9,7 @@ import {
 } from "@/data/esports";
 import { getGame } from "@/lib/catalogue";
 import { GameArt } from "@/components/art/GameArt";
+import { ArtImage } from "@/components/art/ArtImage";
 import { BrowseTabs } from "@/components/browse/browse-tabs";
 import { PageHero } from "@/components/ui/page-hero";
 import { Countdown } from "@/components/ui/interactive";
@@ -224,7 +225,7 @@ export default function EsportsPage() {
         <section className="grid overflow-hidden border border-line bg-bg-card/50 lg:grid-cols-[1.4fr_1fr]">
           <div className="relative min-h-[260px]">
             {game ? (
-              <GameArt game={game} variant="wide" className="absolute inset-0 h-full w-full" />
+              <ArtImage game={game} variant="wide" showTitle={false} className="absolute inset-0 h-full w-full" />
             ) : (
               <div className="absolute inset-0 divider-grid" />
             )}

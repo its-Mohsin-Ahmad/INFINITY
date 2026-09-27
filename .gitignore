@@ -13,3 +13,4 @@ tsconfig.tsbuildinfo
 .vercel
 .api-parked/
 server.log
+scripts/.steam-art-cache.json

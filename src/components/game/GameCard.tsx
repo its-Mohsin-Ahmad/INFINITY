@@ -1,7 +1,8 @@
 import Link from "next/link";
 import clsx from "clsx";
+import { ChevronRight } from "lucide-react";
 import type { Game } from "@/lib/types";
-import { GameArt } from "@/components/art/GameArt";
+import { ArtImage } from "@/components/art/ArtImage";
 import { Badge, PlatformPills, PriceTag, ScoreBadge } from "@/components/ui/primitives";
 import { WishlistButton } from "@/components/player/player-actions";
 import { genreName } from "@/data/taxonomy";
@@ -10,8 +11,8 @@ import { compactNumber } from "@/lib/generate";
 /* ===========================================================================
  * Game cards
  * ---------------------------------------------------------------------------
- * Three presentations of the same record. Art comes from the key-art engine
- * unless an authorised cover has been attached through the CMS.
+ * Three presentations of the same record. Art comes from the storefront when
+ * the catalogue resolved it, and from the key-art engine otherwise.
  * ======================================================================== */
 
 export function GameCard({
@@ -30,27 +31,28 @@ export function GameCard({
   return (
     <article
       className={clsx(
-        "group relative flex flex-col overflow-hidden border border-line bg-bg-card/60 transition duration-300 hover:border-accent/70 hover:shadow-glow",
+        "group relative flex flex-col overflow-hidden border border-line bg-bg-card/60 transition-all duration-300",
+        "hover:-translate-y-1 hover:border-accent/60 hover:shadow-glow focus-within:-translate-y-1",
         className,
       )}
     >
+      {/* accent hairline that lights up on hover */}
+      <span className="pointer-events-none absolute inset-x-0 top-0 z-30 h-0.5 scale-x-0 bg-gradient-to-r from-accent via-accent-bright to-transparent transition-transform duration-500 group-hover:scale-x-100" />
+
       <Link href={`/games/${game.slug}`} className="relative block aspect-[2/3] overflow-hidden" aria-label={game.title}>
-        {game.coverImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={game.coverImage}
-            alt={`${game.title} cover art`}
-            loading={eager ? "eager" : "lazy"}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.06]"
-          />
-        ) : (
-          <GameArt
-            game={game}
-            variant="poster"
-            showTitle={false}
-            className="h-full w-full transition duration-500 group-hover:scale-[1.06]"
-          />
-        )}
+        <ArtImage
+          game={game}
+          variant="poster"
+          showTitle={false}
+          eager={eager}
+          className="h-full w-full transition-transform duration-500 group-hover:scale-[1.07]"
+        />
+
+        {/* legibility scrim: real box art can be bright or busy */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/35 to-bg-deep/10" />
+
+        {/* specular sweep */}
+        <span className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-2/3 group-hover:opacity-100" />
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-2.5">
           <div className="flex flex-col items-start gap-1">
@@ -65,8 +67,14 @@ export function GameCard({
           </div>
         </div>
 
-        <div className="pointer-events-none absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-bg-deep via-bg-deep/40 to-transparent p-3">
-          <h3 className="font-display text-[15px] font-extrabold uppercase leading-tight tracking-tight text-white drop-shadow">
+        {/* hover call to action */}
+        <span className="pointer-events-none absolute inset-x-2.5 bottom-2.5 hidden translate-y-3 items-center justify-center gap-1.5 bg-accent/95 py-2 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 sm:flex">
+          View game
+          <ChevronRight className="h-3.5 w-3.5" />
+        </span>
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col p-3">
+          <h3 className="font-display text-[15px] font-extrabold uppercase leading-tight tracking-tight text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] transition-colors duration-300 group-hover:text-accent">
             {game.title}
           </h3>
           <p className="mt-1 line-clamp-1 text-2xs uppercase tracking-[0.12em] text-ink-secondary">
@@ -76,12 +84,12 @@ export function GameCard({
       </Link>
 
       {showWishlist ? (
-        <div className="absolute bottom-[74px] right-2.5 opacity-0 transition duration-300 group-hover:opacity-100 focus-within:opacity-100">
+        <div className="absolute bottom-[86px] right-2.5 z-20 translate-x-1 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100 focus-within:translate-x-0 focus-within:opacity-100">
           <WishlistButton game={game} />
         </div>
       ) : null}
 
-      <div className="flex flex-1 flex-col justify-between gap-2.5 border-t border-line px-3 py-2.5">
+      <div className="flex flex-1 flex-col justify-between gap-2.5 border-t border-line px-3 py-2.5 transition-colors duration-300 group-hover:bg-bg-card/50">
         <div className="flex items-center justify-between gap-2">
           <PriceTag price={game.price} discount={game.discount} isFree={game.isFree} isComingSoon={game.isComingSoon} />
           <span className="text-2xs uppercase tracking-wider text-ink-muted">
@@ -107,7 +115,7 @@ export function GameListRow({ game, index }: { game: Game; index?: number }) {
         </span>
       ) : null}
       <div className="h-16 w-16 shrink-0 overflow-hidden border border-line">
-        <GameArt game={game} variant="thumb" showTitle={false} className="h-full w-full" />
+        <ArtImage game={game} variant="thumb" showTitle={false} className="h-full w-full" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-display text-sm font-bold uppercase tracking-wide text-white group-hover:text-accent">
@@ -142,7 +150,7 @@ export function GameMiniTile({ game }: { game: Game }) {
       className="group flex items-center gap-3 border border-line bg-bg-card/40 p-2 transition hover:border-accent"
     >
       <div className="h-12 w-12 shrink-0 overflow-hidden border border-line">
-        <GameArt game={game} variant="thumb" showTitle={false} className="h-full w-full" />
+        <ArtImage game={game} variant="thumb" showTitle={false} className="h-full w-full" />
       </div>
       <div className="min-w-0">
         <p className="truncate font-display text-xs font-bold uppercase tracking-wide text-white group-hover:text-accent">

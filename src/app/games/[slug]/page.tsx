@@ -6,6 +6,7 @@ import { GAMES, ALL_GAME_SLUGS, getGame } from "@/lib/catalogue";
 import { similarTo } from "@/lib/catalogue/query";
 import { GENRE_MAP, PLATFORM_MAP } from "@/data/taxonomy";
 import { GameArt } from "@/components/art/GameArt";
+import { ArtImage } from "@/components/art/ArtImage";
 import { GameRow } from "@/components/game/GameGrid";
 import {
   Badge,
@@ -107,7 +108,8 @@ export default async function GamePage({ params }: GamePageProps) {
           {/* ---------------------------------------------------------- main */}
           <div className="min-w-0">
             <div className="relative overflow-hidden border border-line">
-              <GameArt game={game} variant="wide" className="aspect-[21/9] w-full" />
+              <ArtImage game={game} variant="banner" showTitle={false} eager className="aspect-[21/9] w-full" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-deep/70 via-transparent to-bg-deep/30" />
               <div className="absolute left-4 top-4 flex flex-wrap gap-2">
                 {game.isComingSoon ? <Badge tone="soon">Coming soon</Badge> : null}
                 {game.isNew ? <Badge tone="new">New</Badge> : null}
