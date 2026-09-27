@@ -1,0 +1,213 @@
+# INFINITY
+
+**ONE UNIVERSE. INFINITE GAMES.**
+
+A production-grade gaming ecosystem — discovery, commerce, community, esports and
+launching — built on a verified catalogue of **540 games**, **8,189 media items**,
+**89 genre lanes**, **8 platforms** and **334 studios**.
+
+[![Deploy to GitHub Pages](https://github.com/its-Mohsin-Ahmad/INFINITY/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/its-Mohsin-Ahmad/INFINITY/actions/workflows/deploy-pages.yml)
+![Next.js](https://img.shields.io/badge/Next.js-15-000?logo=next.js)
+![React](https://img.shields.io/badge/React-19-087ea4?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?logo=typescript)
+![Tailwind](https://img.shields.io/badge/Tailwind-3-38bdf8?logo=tailwindcss)
+
+**Live site:** <https://its-mohsin-ahmad.github.io/INFINITY/>
+
+---
+
+## Table of contents
+
+- [Highlights](#highlights)
+- [Stack](#stack)
+- [Getting started](#getting-started)
+- [Scripts](#scripts)
+- [Two build targets](#two-build-targets)
+- [Deploying to GitHub Pages](#deploying-to-github-pages)
+- [Project structure](#project-structure)
+- [Data integrity](#data-integrity)
+- [Design notes & limitations](#design-notes--limitations)
+
+---
+
+## Highlights
+
+| Area | What ships |
+| --- | --- |
+| **Discovery** | Hero carousel, trending / new / free / coming-soon rows, genre lanes, platform lanes, tag and facet search |
+| **Detail pages** | `/games/[slug]` with generated key art, screenshots, official videos, per-platform controls, beginner guides, advanced tips, system requirements, store links, similar games and a recently-viewed rail |
+| **Commerce** | Wishlist, compare tray, cart with **server-authoritative pricing**, discounts, toasts, membership/promo surfaces |
+| **Ecosystem** | INFINITY Launcher, Game Pass, Esports hub, Community pillars surfaced across the shell |
+| **Player state** | Zustand store persisted to `localStorage` — wishlist, cart, compare, history, toasts, newsletter opt-in |
+| **Data** | 540 deterministic games with guides, controls, requirements, media, analytics counters and official store links |
+| **Art** | 100% original deterministic SVG key-art engine (posters, wide, hero, thumb, banner) — nothing scraped or hotlinked |
+
+---
+
+## Stack
+
+- **Next.js 15** (App Router, RSC, route handlers)
+- **React 19**
+- **TypeScript 5.7** (strict)
+- **Tailwind CSS 3** — dark navy/red identity (`#020B14`, `#E5092F`)
+- **Zustand 5** — persisted player store
+- **lucide-react** — iconography
+- No database: the catalogue is a deterministic, build-time dataset.
+
+---
+
+## Getting started
+
+```bash
+git clone https://github.com/its-Mohsin-Ahmad/INFINITY.git
+cd INFINITY
+npm install
+npm run dev          # http://localhost:3000
+```
+
+Requirements: **Node.js >= 20.9**.
+
+---
+
+## Scripts
+
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Development server (restores the `/api` routes first) |
+| `npm run build` | Production **server** build → `npm start` |
+| `npm run build:static` | **Static export** for GitHub Pages → `./out` |
+| `npm start` | Serve the server build |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run verify` | Deterministic catalogue verification (fails on any data regression) |
+
+---
+
+## Two build targets
+
+INFINITY compiles in two modes, selected by `NEXT_OUTPUT`:
+
+### 1. Server build (default) — `npm run build`
+
+- Route handlers are compiled: `POST /api/cart/validate`, `POST /api/newsletter`.
+- Cart prices are resolved **on the server** from the verified catalogue, so a
+  tampered client cannot invent its own price.
+- Security headers, image optimisation and ISR-style on-demand rendering are available.
+- Best for Vercel, a VPS, or any Node host.
+
+### 2. Static export — `npm run build:static`
+
+- Sets `output: "export"`, `trailingSlash: true`, `basePath: "/INFINITY"` and
+  `images.unoptimized`.
+- `scripts/prepare-api.mjs` **parks** `src/app/api` (it moves the folder to
+  `.api-parked/`, it never edits it) because GitHub Pages has no server runtime.
+- `NEXT_PUBLIC_STATIC=1` is inlined into the client bundle, so `AddToCartButton`
+  and `NewsletterForm` skip the network and use the identical pricing rule from
+  `src/lib/commerce/cart-line.ts` against the catalogue values already rendered
+  into the page.
+- Output lands in `./out` and can be published to any static host.
+
+> Running `npm run dev` or `npm run build` after `npm run build:static` restores
+> `src/app/api` automatically.
+
+---
+
+## Deploying to GitHub Pages
+
+The workflow **`.github/workflows/deploy-pages.yml`** runs on every push to
+`main` and on manual dispatch:
+
+1. `npm ci`
+2. `npm run typecheck`
+3. `npm run verify` (catalogue must report 540 games / 8,189 media items)
+4. `npm run build:static`
+5. `touch out/.nojekyll`
+6. Upload `./out` as the Pages artifact and deploy to the `github-pages` environment
+
+**One-time repository setup**
+
+1. **Settings → Pages → Build and deployment → Source: _GitHub Actions_**
+   (or run `gh api -X POST repos/its-Mohsin-Ahmad/INFINITY/pages -f build_type=workflow`).
+2. Make sure the repository default branch is `main`.
+
+The site is then served from
+`https://<owner>.github.io/INFINITY/` — if you later move the site to a user or
+custom domain, set `NEXT_PUBLIC_BASE_PATH` to `""` (user site) in the workflow
+environment.
+
+Watch a deployment:
+
+```bash
+gh run list --repo its-Mohsin-Ahmad/INFINITY
+gh run watch --repo its-Mohsin-Ahmad/INFINITY
+```
+
+---
+
+## Project structure
+
+```
+src/
+├── app/
+│   ├── layout.tsx                 # shell, metadata, fonts, boot screen
+│   ├── page.tsx                   # homepage composition
+│   ├── globals.css                # Tailwind layers + component classes
+│   ├── games/[slug]/page.tsx      # game detail (540 prerendered pages)
+│   └── api/
+│       ├── cart/validate/route.ts # server-authoritative pricing
+│       └── newsletter/route.ts    # drop-report signup
+├── components/
+│   ├── art/GameArt.tsx            # deterministic SVG key-art engine
+│   ├── game/                      # GameCard, GameListRow, GameMiniTile, grids/rows
+│   ├── home/                      # HeroCarousel + homepage sections
+│   ├── layout/                    # Header, MegaMenu, Drawer, Footer, CompareTray…
+│   ├── player/                    # store actions, toasts, recently-viewed
+│   └── ui/                        # primitives + interactive (carousel, tabs, …)
+├── data/                          # authored game records + taxonomy
+└── lib/
+    ├── catalogue/                 # build, queries, guides, requirements, pools
+    ├── commerce/cart-line.ts      # the one pricing rule (server + browser)
+    ├── generate.ts                # seeded RNG / hashing helpers
+    ├── nav.ts                     # PRIMARY_NAV + FOOTER_COLUMNS
+    └── store/player-store.ts      # persisted player state
+```
+
+---
+
+## Data integrity
+
+`npm run verify` rebuilds the catalogue from the authored records and asserts the
+invariants that every surface depends on:
+
+- exactly 540 unique games (no duplicate slugs or titles)
+- 8,189 media items (6,032 screenshots + 2,157 videos)
+- 89 genre lanes, 8 platforms, 334 studios
+- every game has guides, controls, requirements, availability and store links
+
+The script exits non-zero on any regression, so it runs as a CI gate.
+
+---
+
+## Design notes & limitations
+
+- **All artwork is generated.** `GameArt` renders deterministic SVG from the
+  game's slug and genre, so nothing is scraped or hotlinked. An authorised CDN
+  image can be attached later through `coverImage`/`heroImage`; the `<img>` path
+  is used automatically when present.
+- **Static hosts cannot run route handlers.** On the Pages build, cart pricing
+  falls back to the shared rule in the browser (see
+  `src/lib/commerce/cart-line.ts`) and the newsletter opt-in is stored locally.
+  Deploy the server build if you need genuine server-side validation.
+- **No authentication or payments.** Accounts, orders and checkout are modelled
+  in the types but not yet wired to a backend.
+- **Listing routes are next.** `/games`, `/deals`, `/new-releases`,
+  `/free-to-play`, `/coming-soon`, `/categories/*`, `/platforms/*`, `/studios/*`
+  and `/esports` are linked from the navigation; the query layer in
+  `src/lib/catalogue/query.ts` already powers them.
+- **Page weight.** Inline SVG key art makes the HTML larger than average; it
+  compresses well, and the art variant per surface is deliberately capped.
+
+---
+
+## License
+
+MIT — see the repository for details.

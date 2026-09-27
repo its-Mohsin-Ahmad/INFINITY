@@ -1,0 +1,197 @@
+import Link from "next/link";
+import { ArrowUpRight, Sparkles } from "lucide-react";
+import { HeroCarousel } from "@/components/home/HeroCarousel";
+import { EcosystemBand, GenreLaneGrid, PlatformDiscovery, PulseBoard } from "@/components/home/HomeSections";
+import { GameGrid, GameRow, RankedGamesTable } from "@/components/game/GameGrid";
+import { Countdown } from "@/components/ui/interactive";
+import { NewsletterForm } from "@/components/player/player-actions";
+import {
+  bestDeals,
+  comingSoonGames,
+  editorsPicks,
+  featuredGames,
+  freeToPlayGames,
+  newReleases,
+  topRated,
+  trendingGames,
+} from "@/lib/catalogue/query";
+
+/* ===========================================================================
+ * Home — the INFINITY front door
+ * ---------------------------------------------------------------------------
+ * Everything below is derived from the live catalogue at request time.
+ * ======================================================================== */
+
+const QUICK_LINKS = [
+  { label: "New releases", href: "/new-releases" },
+  { label: "Top rated", href: "/top-rated" },
+  { label: "Free to play", href: "/free-to-play" },
+  { label: "Deals", href: "/deals" },
+  { label: "Coming soon", href: "/coming-soon" },
+  { label: "Game Pass", href: "/game-pass" },
+  { label: "Esports", href: "/esports" },
+  { label: "Compare", href: "/compare" },
+];
+
+export default function HomePage() {
+  const featured = featuredGames(6);
+  const trending = trendingGames(16);
+  const fresh = newReleases(16);
+  const deals = bestDeals(12);
+  const free = freeToPlayGames(12);
+  const picks = editorsPicks(12);
+  const soon = comingSoonGames(12);
+  const chart = topRated(10);
+
+  return (
+    <>
+      <HeroCarousel games={featured} />
+
+      {/* quick lane chips */}
+      <div className="border-b border-line bg-bg-secondary/50">
+        <div className="shell no-scrollbar flex gap-2 overflow-x-auto py-3">
+          <span className="flex shrink-0 items-center gap-1.5 pr-2 font-display text-2xs font-bold uppercase tracking-[0.16em] text-ink-muted">
+            <Sparkles className="h-3.5 w-3.5 text-accent" />
+            Jump to
+          </span>
+          {QUICK_LINKS.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="shrink-0 border border-line px-3 py-1.5 font-display text-2xs font-bold uppercase tracking-[0.12em] text-ink-secondary transition hover:border-accent hover:text-white"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="shell space-y-16 py-12">
+        <GameRow
+          eyebrow="Climbing fast"
+          title="Trending across the universe"
+          description="Ranked by plays, wishlists and review velocity over the current window."
+          games={trending}
+          href="/games"
+          linkLabel="Browse all"
+        />
+
+        <PlatformDiscovery />
+
+        <GameRow
+          eyebrow="Save hard"
+          title="Season sale — verified discounts"
+          description="Prices, discounts and availability are re-read from the catalogue on every request."
+          games={deals}
+          href="/deals"
+          linkLabel="All deals"
+          action={<Countdown to="2026-12-31T23:59:59Z" label="Sale ends in" />}
+        />
+
+        <GenreLaneGrid limit={12} />
+
+        <GameRow
+          eyebrow="Just landed"
+          title="New releases this window"
+          games={fresh}
+          href="/new-releases"
+          linkLabel="All new releases"
+        />
+
+        <PulseBoard />
+
+        <EcosystemBand />
+
+        <section className="grid gap-8 lg:grid-cols-[1.15fr_1fr]">
+          <div>
+            <div className="mb-5 border-b border-line pb-3">
+              <p className="eyebrow mb-1.5">Critic approved</p>
+              <h2 className="section-title">Top 10 rated on INFINITY</h2>
+            </div>
+            <RankedGamesTable games={chart} />
+          </div>
+          <div>
+            <div className="mb-5 flex items-end justify-between gap-3 border-b border-line pb-3">
+              <div>
+                <p className="eyebrow mb-1.5">Zero cost</p>
+                <h2 className="section-title">Free to play</h2>
+              </div>
+              <Link
+                href="/free-to-play"
+                className="group inline-flex items-center gap-1 border border-line px-3 py-1.5 font-display text-2xs font-bold uppercase tracking-[0.14em] text-ink-secondary transition hover:border-accent hover:text-white"
+              >
+                See all
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+            <GameGrid games={free.slice(0, 6)} columns={3} />
+          </div>
+        </section>
+
+        <GameRow
+          eyebrow="Handpicked"
+          title={"Editors' picks"}
+          description="Chosen by the INFINITY editorial desk for craft, innovation and cultural footprint."
+          games={picks}
+          href="/games?sort=rating"
+          linkLabel="Rated highest"
+        />
+
+        {soon.length ? (
+          <GameRow
+            eyebrow="On the horizon"
+            title="Coming soon"
+            description="Wishlist a title and INFINITY will notify you when pre-orders or launch go live."
+            games={soon}
+            href="/coming-soon"
+            linkLabel="Full calendar"
+            size="sm"
+          />
+        ) : null}
+
+        {/* launcher CTA */}
+        <section className="relative overflow-hidden border border-line bg-bg-nav p-7 lg:p-10">
+          <div className="aura-accent pointer-events-none absolute inset-0" />
+          <div className="relative grid gap-8 lg:grid-cols-[1.3fr_1fr] lg:items-center">
+            <div>
+              <p className="eyebrow mb-2">One client, every library</p>
+              <h2 className="h-display text-3xl sm:text-4xl">
+                Install the INFINITY
+                <br />
+                launcher
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-ink-secondary">
+                Unified library across storefronts, patch and mod management, cloud saves, friend presence and a
+                download manager built for 100 GB installs. Free on Windows 10 and 11.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/launcher"
+                  className="bg-accent px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+                >
+                  Download launcher
+                </Link>
+                <Link
+                  href="/downloads"
+                  className="border border-line px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:border-accent"
+                >
+                  All builds
+                </Link>
+              </div>
+            </div>
+            <div className="border border-line bg-bg-card/60 p-5">
+              <p className="font-display text-sm font-bold uppercase tracking-[0.14em] text-white">
+                Stay in the loop
+              </p>
+              <p className="mb-4 mt-1 text-xs text-ink-muted">
+                Weekly drop report: releases, verified deals, patch notes and esports results.
+              </p>
+              <NewsletterForm />
+            </div>
+          </div>
+        </section>
+      </div>
+    </>
+  );
+}
+
