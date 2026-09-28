@@ -44,17 +44,41 @@ export function HeroCarousel({ games }: { games: Game[] }) {
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      <div key={game.slug} className="absolute inset-0 animate-fade-in">
-        <div className="h-full w-full animate-kenburns">
-          <ArtImage
-            game={game}
-            variant="hero"
-            showTitle={false}
-            eager
-            className="h-full w-full object-cover"
-          />
-        </div>
-      </div>
+      {/*
+        Every slide stays mounted and is cross-faded with opacity. Mounting only
+        the active slide meant each rotation started a cold image fetch, so the
+        reel advanced into an empty frame before the art arrived — the hero
+        looked like it had no photography at all. Keeping them all in the DOM
+        lets the browser decode ahead.
+        Only the first slide is `eager`: blocking the initial paint on ten
+        ultra-wide frames would cost more than the preload is worth, and the
+        lazy ones are already in the viewport so they resolve within a beat.
+        Ken Burns is applied to the active slide only, so one animation runs
+        instead of ten.
+      */}
+      {games.map((item, i) => {
+        const active = i === index;
+        return (
+          <div
+            key={item.slug}
+            aria-hidden={!active}
+            className={clsx(
+              "absolute inset-0 transition-opacity duration-700 ease-out",
+              active ? "opacity-100" : "opacity-0",
+            )}
+          >
+            <div className={clsx("h-full w-full", active && "animate-kenburns")}>
+              <ArtImage
+                game={item}
+                variant="hero"
+                showTitle={false}
+                eager={i === 0}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </div>
+        );
+      })}
       {/*
         Legibility scrim. Tuned so the photograph stays clearly visible: the
         copy side is dark enough for AA text, the right two thirds only get a
