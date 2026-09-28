@@ -9,8 +9,8 @@ import {
   bestDeals,
   comingSoonGames,
   editorsPicks,
-  featuredGames,
   freeToPlayGames,
+  heroGames,
   newReleases,
   topRated,
   trendingGames,
@@ -34,7 +34,10 @@ const QUICK_LINKS = [
 ];
 
 export default function HomePage() {
-  const featured = featuredGames(6);
+  // Ten slides rather than six: the brief asks for a deep adventure reel, and
+  // every slug below has real storefront photography, so none of the extra
+  // slides can degrade into generated key art.
+  const featured = heroGames(10);
   const trending = trendingGames(16);
   const fresh = newReleases(16);
   const deals = bestDeals(12);

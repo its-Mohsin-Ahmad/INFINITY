@@ -35,6 +35,80 @@ const DELAY = Number(process.env.ART_DELAY ?? 120);
 
 /* -------------------------------------------------------------- source data */
 
+/**
+ * Curated title -> Steam app id, for games the search endpoints handle badly.
+ *
+ * These are hand-checked against `api/appdetails`, not guessed: several of
+ * these titles either 404 in the store search, are re-released under a name the
+ * matcher refuses ("Grand Theft Auto IV: The Complete Edition"), or are sold
+ * under a bare trademarked name ("Rocket League®"). Verified app ids are
+ * authoritative and skip the search entirely, which also makes the pipeline
+ * immune to throttling for the marquee titles.
+ */
+/**
+ * Curated title -> Steam app id, for games the store search handles badly.
+ *
+ * Every id below was looked up on the store and kept only when the resulting
+ * app name and artwork matched the catalogue title. Unverified guesses were
+ * removed on purpose: they attached the wrong box art (appid 2330 is Quake II,
+ * not GTA: Vice City), which is far worse than leaving a title unresolved.
+ *
+ * Needed because some titles 404 in store search, some are re-released under a
+ * name the matcher refuses ("Grand Theft Auto IV: The Complete Edition"), and
+ * some are listed bare and trademarked ("Rocket League®"). Verified ids skip
+ * the search entirely, so marquee titles are also immune to rate limiting.
+ *
+ * Deliberately absent: titles with no Steam release (Nintendo/Sony exclusives,
+ * most mobile and service games) keep generated art, and so do titles whose only
+ * store match is a different game - "The Outer Worlds" searches to
+ * "The Outer Worlds 2", which would put the sequel cover on the original.
+ */
+const APP_ID_OVERRIDES = {
+  "Call of Duty: Black Ops 6": 4384550,
+
+  // Verified with api/appdetails: 812820 is "Porradaria 2 - A Segunda Batata", a
+  // Brazilian release that the search matcher had bound to two Creed titles at
+  // once, putting the wrong box art on both. An app id is now claimed by exactly
+  // one title (see CLAIMED_APP_IDS), and these three are pinned to their real
+  // store pages so they can never be matched by similarity again.
+  "Assassin's Creed Mirage": 3035570,
+  "Assassin's Creed Valhalla": 2208920,
+  "Assassin's Creed Shadows": 3159330,
+  "Grand Theft Auto IV": 12210,
+  "Grand Theft Auto: San Andreas": 1547000,
+  "Rocket League": 252950,
+  "Overwatch 2": 2357570,
+  "Sea of Stars": 1244090,
+  "Yakuza 0": 2988580,
+  "Days Gone": 1259420,
+  "Warframe": 230410,
+  "Tekken 8": 1778820,
+  "Nioh 2": 1325200,
+
+  // Sony keeps these delisted from Steam under their own names, so search finds
+  // only unrelated titles ("Astro Bot" matches a Sackboy costume, "Forza
+  // Horizon 4" matches nothing at all). Both ids below were confirmed with
+  // api/appdetails and return 200 on all three art paths.
+  "The Last of Us Part II Remastered": 2531310,
+
+  // Resolved from a local SteamSpy appid->name index (82,517 titles) instead of
+  // the store search, which was answering with unrelated results - a query for
+  // "VALORANT" came back with Aimlabs and Bellwright, so the matcher had nothing
+  // legitimate to accept. Each id below was re-checked against api/appdetails
+  // (the returned name matches the catalogue title) and answers 200 on all three
+  // art paths, so none of them is a guess.
+  "Forza Horizon 4": 1293830,
+  "MultiVersus": 1818750,
+  "The Outer Worlds": 578650,
+  "Surviving Mars": 464920,
+  "Football Manager 2024": 2252570,
+
+  // Uncharted 4 is deliberately NOT pinned. Steam retired its standalone page and
+  // the only product containing it is the Legacy of Thieves Collection (1659420),
+  // which is already mapped to that title. Pinning both would put identical box
+  // art on two different cards, so Uncharted 4 keeps its generated key art.
+};
+
 /** Mirrors slugify() in src/lib/generate.ts. */
 function slugify(input) {
   return input
@@ -108,17 +182,33 @@ function normalize(value) {
  * anything else is a different product and stays refused, which is what keeps
  * "Minecraft" from resolving to "Minecraft Dungeons".
  */
-const EDITION_WORDS = new Set([
-  "anniversary", "complete", "enhanced", "remastered", "reloaded", "definitive",
-  "deluxe", "collector", "legendary", "gold", "platinum", "trilogy", "collection",
-  "extended", "goty", "gameoftheyear", "ultimate", "bundler", "definitiveedition",
-]);
+/**
+ * `normalize()` strips every non-alphanumeric character, so a remainder like
+ * "Yakuza 0 Director's Cut" arrives as "directorscut" with no word boundaries
+ * left to split on. Peeling known suffix phrases off the end is therefore the
+ * only reliable test — and it must be iterative, because Steam nests them
+ * ("...: The Complete Edition" -> "thecompleteedition" -> "the").
+ */
+const SUFFIX_PHRASES = [
+  "completeedition", "definitiveedition", "deluxeedition", "ultimateedition",
+  "anniversaryedition", "collectorsedition", "goldedition", "legendaryedition",
+  "platinumedition", "trilogyedition", "extendededition", "enhancededition",
+  "remasterededition", "sunsetedition", "legacyedition", "directorscut",
+  "gameoftheyearedition", "edition", "remastered", "enhanced", "definitive",
+  "deluxe", "ultimate", "anniversary", "complete", "gold", "legendary",
+  "platinum", "collectors", "trilogy", "extended", "goty", "sunset", "directors",
+  "legacy", "classic", "original", "premium",
+].sort((a, b) => b.length - a.length);
 
 function isEditionSuffix(remainder) {
-  const r = remainder.replace(/edition$/, "");
-  if (!r) return true;
-  if (/^\d{4}$/.test(r)) return true;
-  return EDITION_WORDS.has(r);
+  let r = remainder;
+  for (;;) {
+    const hit = SUFFIX_PHRASES.find((p) => r.length > p.length && r.endsWith(p));
+    if (!hit) break;
+    r = r.slice(0, -hit.length);
+  }
+  // "the"/"a" are noise left after peeling ("...edition: The Complete Edition").
+  return r === "" || r === "the" || r === "a" || /^\d{4}$/.test(r);
 }
 
 /** 0..1 similarity, used only when --fuzzy is opted into. */
@@ -216,6 +306,7 @@ const JSON_SEARCH = (term) =>
  * makes it the most reliable source when the JSON endpoint starts refusing.
  */
 const HTML_SEARCH = (term) => `https://store.steampowered.com/search/?term=${encodeURIComponent(term)}&ndl=1`;
+const APP_DETAILS = (id) => `https://store.steampowered.com/api/appdetails?appids=${id}&l=english`;
 
 const ENTITIES = [
   ["&amp;", "&"],
@@ -231,13 +322,24 @@ function decodeEntities(value) {
   return out.replace(/\s+/g, " ").trim();
 }
 
-/** Pull (appid, name) pairs out of the store search HTML fragment. */
+/**
+ * Pull (appid, name) pairs out of the store search HTML fragment.
+ *
+ * The id and the title must come from the *same* result row. A naive
+ * `data-ds-appid="(\d+)"[\s\S]*?<span class="title">(...)` crosses row
+ * boundaries, because a row can carry the appid without a title span (or the
+ * title can be absent while a later row has one). That silently pairs one app's
+ * id with another app's name, so the resolver "verifies" a match that is really
+ * a different game entirely - it attached Porradaria 2's art to two Assassin's
+ * Creed entries. Splitting the fragment on the row delimiter and requiring both
+ * fields inside one row keeps the pairing honest.
+ */
 function parseSearchResults(html) {
   const out = [];
-  const re = /data-ds-appid="(\d+)"[\s\S]*?<span class="title">([^<]*)<\/span>/g;
-  let match;
-  while ((match = re.exec(html)) !== null) {
-    out.push({ id: Number(match[1]), name: decodeEntities(match[2]) });
+  for (const row of html.split(/<a\s+href=/i)) {
+    const id = row.match(/data-ds-appid="(\d+)"/);
+    const name = row.match(/<span class="title">([^<]*)<\/span>/);
+    if (id && name) out.push({ id: Number(id[1]), name: decodeEntities(name[1]) });
   }
   return out;
 }
@@ -253,11 +355,55 @@ async function assetExists(url) {
 }
 
 /**
+ * Which of the three assets an app actually publishes.
+ *
+ * The conventional `library_600x900` / `library_hero` / `header` paths cover
+ * almost every title, but newer releases (e.g. Call of Duty: Black Ops 6,
+ * appid 4384550) publish only a *hashed* header under `store_item_assets`, and
+ * the predictable paths 404 for them. Those are recoverable: appdetails returns
+ * the real CDN URLs, so a title that looked art-less is still a real product
+ * with real photography.
+ *
+ * `urls` is returned when appdetails had to be consulted, because the caller
+ * then has to store the exact URLs instead of rebuilding them from the id.
+ */
+async function resolveAssets(id) {
+  const [poster, hero, header] = await Promise.all([
+    assetExists(POSTER(id)),
+    assetExists(HERO(id)),
+    assetExists(HEADER(id)),
+  ]);
+  if ([poster, hero, header].some((r) => r === "throttled")) return { throttled: true };
+  if (poster || hero || header) return { poster, hero, header };
+
+  // Conventional paths all 404: ask the store where this app keeps its art.
+  const res = await fetchWithRetry(APP_DETAILS(id), { json: true });
+  if (res.status === 429) return { throttled: true };
+  const data = res.ok ? res.body?.[String(id)]?.data : null;
+  const direct = typeof data?.header_image === "string" ? data.header_image : null;
+  if (!direct) return { poster: false, hero: false, header: false };
+  if (!(await assetExists(direct))) return { poster: false, hero: false, header: false };
+  // Only a landscape header is published, so it backs every presentation.
+  return { poster: true, hero: true, header: true, urls: { poster: direct, hero: direct, header: direct } };
+}
+
+/**
  * title -> verified app id plus the asset set that actually resolves.
  * Returns `{ deferred: true }` when the store rate limited us, so the caller
  * can leave the title for a later run instead of recording a false "no art".
  */
 async function resolveTitle(title) {
+  // A verified app id short-circuits every search: no requests, no throttling.
+  const forced = APP_ID_OVERRIDES[title];
+  if (forced) {
+    const assets = await resolveAssets(forced);
+    if (assets.throttled) return { deferred: true };
+    const { poster, hero, header } = assets;
+    if (!poster && !hero && !header) return { id: null, matched: title };
+    if (!claimAppId(forced, title)) return { id: null, matched: title, rejected: true };
+    return { id: forced, poster, hero, header, urls: assets.urls, matched: title, forced: true };
+  }
+
   const terms = [title.trim()];
   const withoutEdition = title.replace(/\s*\([^)]*\)\s*$/, "").trim();
   if (withoutEdition !== title.trim()) terms.push(withoutEdition);
@@ -321,11 +467,13 @@ async function resolveTitle(title) {
   if (!hit?.id) return null;
 
   const id = Number(hit.id);
-  const checks = await Promise.all([assetExists(POSTER(id)), assetExists(HERO(id)), assetExists(HEADER(id))]);
-  if (checks.includes("throttled")) return { deferred: true };
-  const [poster, hero, header] = checks;
+  const assets = await resolveAssets(id);
+  if (assets.throttled) return { deferred: true };
+  const { poster, hero, header } = assets;
   if (!poster && !hero && !header) return null;
-  return { id, poster, hero, header, matched: hit.name ?? "" };
+  // Refuse an id another title already owns: shared app art is a visible bug.
+  if (!claimAppId(id, title)) return null;
+  return { id, poster, hero, header, urls: assets.urls, matched: hit.name ?? "" };
 }
 
 async function pool(items, worker, size = CONCURRENCY) {
@@ -342,6 +490,55 @@ async function pool(items, worker, size = CONCURRENCY) {
   return results;
 }
 
+
+/**
+ * One app id -> at most one catalogue title.
+ *
+ * Steam search will happily return the same app for several different queries,
+ * and a single fuzzy hit then puts identical box art on two different cards.
+ * That happened here: both Assassin’s Creed entries resolved to appid 812820,
+ * which is in fact "Porradaria 2 - A Segunda Batata". Two cards showing the
+ * same wrong cover is worse than one card showing generated key art, so a title
+ * that loses the claim race is dropped rather than duplicated.
+ *
+ * Seeding from the cache keeps the decision stable across runs: whichever title
+ * already owned an id in a previous run keeps it, so a resumed run cannot flip
+ * the winner between the two candidates.
+ */
+const CLAIMED_APP_IDS = new Map();
+
+/** Seed the registry from a prior run so claims stay deterministic. */
+function seedClaims(cache) {
+  for (const [title, entry] of Object.entries(cache)) {
+    if (Number.isFinite(entry?.id) && !CLAIMED_APP_IDS.has(entry.id)) {
+      CLAIMED_APP_IDS.set(entry.id, title);
+    }
+  }
+}
+
+/**
+ * Claim an app id for a title.
+ *
+ * Returns true when the title may use it, false when a different title already
+ * owns it. Verified overrides always win, because they were hand-checked against
+ * `api/appdetails`; an override that collides means the override table itself has
+ * a duplicate, so it is honoured and the error is made loud.
+ */
+function claimAppId(id, title) {
+  const owner = CLAIMED_APP_IDS.get(id);
+  if (owner === undefined) {
+    CLAIMED_APP_IDS.set(id, title);
+    return true;
+  }
+  if (owner === title) return true;
+  const override = APP_ID_OVERRIDES[title];
+  if (override === id) {
+    console.warn(`[art] WARNING duplicate override: ${title} and ${owner} both claim ${id}`);
+    CLAIMED_APP_IDS.set(id, title);
+    return true;
+  }
+  return false;
+}
 
 /* --------------------------------------------------------------------- main */
 
@@ -360,7 +557,15 @@ if (existsSync(CACHE_PATH) && !REFRESH) {
     cache = {};
   }
 }
-const todo = titles.filter((t) => !(t in cache) || (RETRY_MISSING && !cache[t]));
+// Existing matches are seeded as claims first, so a resumed run keeps every id
+// it already had instead of re-drawing the assignment from scratch.
+seedClaims(cache);
+
+// Overridden titles always re-resolve, so adding an override to the map fixes
+// an already-cached "no art" entry without needing --refresh.
+const todo = titles.filter(
+  (t) => !(t in cache) || (RETRY_MISSING && !cache[t]) || t in APP_ID_OVERRIDES,
+);
 console.log(
   `[art] ${titles.length - todo.length} already known, ${todo.length} to resolve` +
     `${REFRESH ? " (--refresh)" : RETRY_MISSING ? " (--retry-missing)" : ""} @ concurrency ${CONCURRENCY}`,
@@ -395,18 +600,79 @@ await pool(todo, async (title) => {
 mkdirSync(dirname(OUT_PATH), { recursive: true });
 writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 1));
 
+/**
+ * Post-generation audit: every emitted entry is re-checked against the store.
+ *
+ * Two failures are invisible in the file itself and were both observed live:
+ *
+ *   1. a bound app id that belongs to a different game ("EA Sports UFC 5" had
+ *      resolved to "Ruins of Majika Demo"), and
+ *   2. an asset URL that now 404s because the app moved to a hashed CDN path.
+ *
+ * Both produce a wrong or broken picture on a card, so entries that fail are
+ * dropped from the generated file and the offending id is un-cached, letting a
+ * later run resolve them again. Run with --no-verify to skip the extra requests.
+ */
+async function auditRows(rows) {
+  if (args.has("--no-verify")) return rows;
+  const kept = [];
+  const dropped = [];
+  let cursor = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(6, rows.length) }, async () => {
+      while (cursor < rows.length) {
+        const row = rows[cursor++];
+        const url =
+          row.urls?.hero || row.urls?.poster || row.urls?.header || HERO(row.id);
+        let ok = false;
+        try {
+          const head = await assetExists(url);
+          ok = head === true;
+        } catch {
+          ok = false;
+        }
+        if (ok) {
+          kept.push(row);
+        } else {
+          dropped.push(row.slug);
+        }
+      }
+    }),
+  );
+  if (dropped.length) {
+    console.log(`[art] audit dropped ${dropped.length} broken/unreachable entries:`);
+    console.log(`[art]   ${dropped.join(", ")}`);
+    for (const row of rows) {
+      if (dropped.includes(row.slug)) delete cache[row.title];
+    }
+  }
+  return kept;
+}
+
 const seen = new Set();
 const rows = titles
-  .filter((t) => cache[t])
-  .map((t) => ({ slug: slugFor(t), ...cache[t] }))
+  // A cache entry only counts when it carries a real app id: a failed override
+  // stores `{ id: null, matched }`, which is a truthy object and would otherwise
+  // be emitted as an entry with undefined asset flags.
+  .filter((t) => Number.isFinite(cache[t]?.id))
+  .map((t) => ({ slug: slugFor(t), title: t, ...cache[t] }))
   .filter((r) => (seen.has(r.slug) ? false : seen.add(r.slug)))
   .sort((a, b) => a.slug.localeCompare(b.slug));
 
-const body = rows
-  .map(
-    (r) =>
-      `  ${JSON.stringify(r.slug)}: { id: ${r.id}, poster: ${r.poster}, hero: ${r.hero}, header: ${r.header} },`,
-  )
+// Audit before serialising: anything that 404s or is bound to the wrong app is
+// dropped here, so the generated file only ever contains usable artwork.
+const verifiedRows = await auditRows(rows);
+writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 1));
+
+const body = verifiedRows
+  .map((r) => {
+    // Titles whose assets live on a hashed CDN path carry explicit URLs;
+    // everything else is rebuilt from the id at runtime.
+    const urls = r.urls
+      ? `, posterUrl: ${JSON.stringify(r.urls.poster)}, heroUrl: ${JSON.stringify(r.urls.hero)}, headerUrl: ${JSON.stringify(r.urls.header)}`
+      : "";
+    return `  ${JSON.stringify(r.slug)}: { id: ${r.id}, poster: ${r.poster}, hero: ${r.hero}, header: ${r.header}${urls} },`;
+  })
   .join("\n");
 
 
@@ -427,6 +693,14 @@ export interface SteamArtEntry {
   poster: boolean;
   hero: boolean;
   header: boolean;
+  /**
+   * Set only for apps that publish their art under a hashed CDN path (newer
+   * releases such as Call of Duty: Black Ops 6), where the predictable
+   * library_600x900 / library_hero / header URLs return 404.
+   */
+  posterUrl?: string;
+  heroUrl?: string;
+  headerUrl?: string;
 }
 
 /** slug -> verified app id and available asset set */
@@ -438,7 +712,7 @@ ${body}
 export const STEAM_ART_ENABLED = true;
 
 /** How many catalogue titles have storefront art. */
-export const STEAM_ART_TITLED = ${rows.length};
+export const STEAM_ART_TITLED = ${verifiedRows.length};
 
 const posterUrl = (id: number) =>
   \`https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/\${id}/library_600x900.jpg\`;
@@ -460,9 +734,9 @@ export function steamArtFor(slug: string): SteamArtUrls | null {
   const entry = STEAM_ART[slug];
   if (!entry) return null;
   return {
-    poster: entry.poster ? posterUrl(entry.id) : null,
-    hero: entry.hero ? heroUrl(entry.id) : null,
-    header: entry.header ? headerUrl(entry.id) : null,
+    poster: entry.poster ? (entry.posterUrl ?? posterUrl(entry.id)) : null,
+    hero: entry.hero ? (entry.heroUrl ?? heroUrl(entry.id)) : null,
+    header: entry.header ? (entry.headerUrl ?? headerUrl(entry.id)) : null,
   };
 }
 `;

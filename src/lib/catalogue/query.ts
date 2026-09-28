@@ -101,8 +101,72 @@ export function trendingGames(limit = 12): Game[] {
   return sortGames(GAMES.filter((g) => g.isTrending && !g.isComingSoon), "popular").slice(0, limit);
 }
 
-export function featuredGames(limit = 10): Game[] {
-  return sortGames(GAMES.filter((g) => g.isFeatured), "popular").slice(0, limit);
+/**
+ * Ordered marquee reel for the homepage carousel.
+ *
+ * Two rules drive this list:
+ *
+ *   1. It is hand-picked rather than rating-sorted, so the reel always leads
+ *      with the biggest open-world/adventure franchises instead of whatever a
+ *      catalogue-wide sort happens to surface (which had put art-less
+ *      Nintendo exclusives in the first two slots).
+ *   2. Entries are kept only when the title has real photography. A slide that
+ *      silently falls back to generated art is a worse hero than the next
+ *      title on the list, so anything without a hero image is skipped.
+ *
+ * Slugs that are absent from the catalogue (or that have no artwork yet) are
+ * simply dropped, so the reel degrades in length rather than breaking.
+ */
+const HERO_SLUGS = [
+
+  // Open-world and adventure marquee, hand-picked so the reel always leads with
+  // the biggest franchises rather than whatever a catalogue-wide sort surfaces.
+  "red-dead-redemption-2",
+  "grand-theft-auto-v",
+  "call-of-duty-black-ops-6",
+  "assassins-creed-shadows",
+  "assassins-creed-valhalla",
+  "assassins-creed-mirage",
+  "the-witcher-3-wild-hunt",
+  "elden-ring",
+  "cyberpunk-2077",
+  "baldurs-gate-3",
+  "ghost-of-tsushima-directors-cut",
+  "horizon-forbidden-west",
+  "death-stranding-2-on-the-beach",
+  "death-stranding-directors-cut",
+  "the-last-of-us-part-2",
+  "days-gone",
+  "god-of-war-ragnarok",
+  "god-of-war",
+  "marvels-spider-man-2",
+  "ratchet-and-clank-rift-apart",
+  "hogwarts-legacy",
+  "starfield",
+  "age-of-empires-iv",
+  "sea-of-thieves",
+  "forza-horizon-5",
+  "the-elder-scrolls-v-skyrim",
+];
+
+/** Marquee reel for the hero carousel: real photography only, in a curated order. */
+export function heroGames(limit = 6): Game[] {
+  const byslug = new Map(GAMES.map((g) => [g.slug, g]));
+  const picks: Game[] = [];
+  for (const slug of HERO_SLUGS) {
+    if (picks.length >= limit) break;
+    const game = byslug.get(slug);
+    // Coming-soon entries have no real photography yet, so they cannot fill a slot.
+    if (game && !game.isComingSoon && game.heroImage) picks.push(game);
+  }
+  // Backfill from the featured set so the reel is never shorter than requested.
+  if (picks.length < limit) {
+    for (const game of sortGames(GAMES.filter((g) => g.isFeatured), "popular")) {
+      if (picks.length >= limit) break;
+      if (game.heroImage && !picks.some((p) => p.slug === game.slug)) picks.push(game);
+    }
+  }
+  return picks;
 }
 
 export function newReleases(limit = 12): Game[] {

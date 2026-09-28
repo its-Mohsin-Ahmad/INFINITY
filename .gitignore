@@ -14,3 +14,9 @@ tsconfig.tsbuildinfo
 .api-parked/
 server.log
 scripts/.steam-art-cache.json
+
+# Scratch files from the artwork resolver and its local SteamSpy index build.
+# These are working data, not sources: regenerate with `npm run fetch:art`.
+spy_*.json
+spy-index.json
+*.log

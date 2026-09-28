@@ -15,6 +15,14 @@ export interface SteamArtEntry {
   poster: boolean;
   hero: boolean;
   header: boolean;
+  /**
+   * Set only for apps that publish their art under a hashed CDN path (newer
+   * releases such as Call of Duty: Black Ops 6), where the predictable
+   * library_600x900 / library_hero / header URLs return 404.
+   */
+  posterUrl?: string;
+  heroUrl?: string;
+  headerUrl?: string;
 }
 
 /** slug -> verified app id and available asset set */
@@ -68,6 +76,7 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "borderlands-4": { id: 1285190, poster: true, hero: true, header: true },
   "brawlhalla": { id: 291550, poster: true, hero: true, header: true },
   "bus-simulator-21-next-stop": { id: 976590, poster: true, hero: true, header: true },
+  "call-of-duty-black-ops-6": { id: 4384550, poster: true, hero: true, header: true, posterUrl: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4384550/836828b783fc1208664d6c3f9fe88e9abf060813/header.jpg?t=1783699904", heroUrl: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4384550/836828b783fc1208664d6c3f9fe88e9abf060813/header.jpg?t=1783699904", headerUrl: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4384550/836828b783fc1208664d6c3f9fe88e9abf060813/header.jpg?t=1783699904" },
   "call-of-duty-black-ops-cold-war": { id: 1985810, poster: true, hero: true, header: true },
   "call-of-duty-modern-warfare": { id: 2000950, poster: true, hero: true, header: true },
   "call-of-duty-modern-warfare-ii": { id: 3595230, poster: false, hero: true, header: false },
@@ -103,6 +112,7 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "dead-rising-deluxe-remaster": { id: 2527390, poster: true, hero: true, header: true },
   "dead-space": { id: 1693980, poster: true, hero: true, header: true },
   "deadlock": { id: 1422450, poster: true, hero: true, header: true },
+  "death-stranding-2-on-the-beach": { id: 3280350, poster: true, hero: true, header: true },
   "death-stranding-directors-cut": { id: 1850570, poster: true, hero: true, header: true },
   "deep-rock-galactic": { id: 548430, poster: true, hero: true, header: true },
   "deltarune": { id: 1671210, poster: true, hero: true, header: true },
@@ -159,6 +169,8 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "final-fantasy-xiv-online": { id: 39210, poster: true, hero: true, header: true },
   "final-fantasy-xvi": { id: 2515020, poster: true, hero: true, header: true },
   "firewatch": { id: 383870, poster: true, hero: true, header: true },
+  "football-manager-2024": { id: 2252570, poster: true, hero: true, header: true },
+  "forza-horizon-4": { id: 1293830, poster: true, hero: true, header: true },
   "forza-horizon-5": { id: 1551360, poster: true, hero: true, header: true },
   "forza-motorsport": { id: 2440510, poster: true, hero: true, header: true },
   "fragpunk": { id: 2943650, poster: true, hero: true, header: true },
@@ -172,7 +184,10 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "god-of-war-ragnarok": { id: 2322010, poster: true, hero: true, header: true },
   "golf-it": { id: 571740, poster: true, hero: true, header: true },
   "granblue-fantasy-relink": { id: 881020, poster: true, hero: true, header: true },
+  "grand-theft-auto-4": { id: 12210, poster: true, hero: true, header: true },
+  "grand-theft-auto-san-andreas": { id: 1547000, poster: true, hero: true, header: true },
   "grand-theft-auto-v": { id: 3240220, poster: true, hero: true, header: true },
+  "grand-theft-auto-vice-city": { id: 1546990, poster: true, hero: true, header: true },
   "greedfall": { id: 606880, poster: true, hero: true, header: true },
   "green-hell": { id: 815370, poster: true, hero: true, header: true },
   "grounded": { id: 962130, poster: true, hero: true, header: true },
@@ -243,6 +258,7 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "mortal-shell": { id: 1110910, poster: true, hero: true, header: true },
   "motogp-25": { id: 3077390, poster: true, hero: true, header: true },
   "moving-out-2": { id: 1641700, poster: true, hero: true, header: true },
+  "multiversus": { id: 1818750, poster: true, hero: true, header: true },
   "mxgp-24-the-official-game": { id: 2603040, poster: true, hero: true, header: true },
   "my-time-at-sandrock": { id: 1084600, poster: true, hero: true, header: true },
   "naraka-bladepoint": { id: 1203220, poster: true, hero: true, header: true },
@@ -255,6 +271,7 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "new-world-aeternum": { id: 1063730, poster: true, hero: true, header: true },
   "nier-automata": { id: 524220, poster: true, hero: true, header: true },
   "nier-replicant": { id: 1113560, poster: true, hero: true, header: true },
+  "nioh-2": { id: 1325200, poster: true, hero: true, header: true },
   "no-mans-sky": { id: 275850, poster: true, hero: true, header: true },
   "northgard": { id: 466560, poster: true, hero: true, header: true },
   "octopath-traveler-ii": { id: 1971650, poster: true, hero: true, header: true },
@@ -266,12 +283,12 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "outer-wilds": { id: 753640, poster: true, hero: true, header: true },
   "outlast-2": { id: 414700, poster: true, hero: true, header: true },
   "overcooked-2": { id: 728880, poster: true, hero: true, header: true },
+  "overwatch-2": { id: 2357570, poster: true, hero: true, header: true },
   "oxygen-not-included": { id: 457140, poster: true, hero: true, header: true },
   "pacific-drive": { id: 1458140, poster: true, hero: true, header: true },
   "paladins": { id: 444090, poster: true, hero: true, header: true },
   "palworld": { id: 1623730, poster: true, hero: true, header: true },
   "path-of-exile-2": { id: 2694490, poster: true, hero: true, header: true },
-  "pathfinder-wrath-of-the-righteous": { id: 1184370, poster: true, hero: true, header: true },
   "payday-2": { id: 218620, poster: true, hero: true, header: true },
   "payday-3": { id: 1272080, poster: true, hero: true, header: true },
   "peak": { id: 3527290, poster: false, hero: true, header: false },
@@ -311,6 +328,7 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "rimworld": { id: 294100, poster: true, hero: true, header: true },
   "rise-of-the-ronin": { id: 1340990, poster: true, hero: true, header: true },
   "risk-of-rain-2": { id: 632360, poster: true, hero: true, header: true },
+  "rocket-league": { id: 252950, poster: true, hero: true, header: true },
   "rogue-company": { id: 872200, poster: true, hero: true, header: true },
   "runescape": { id: 1343400, poster: true, hero: true, header: true },
   "rust": { id: 252490, poster: true, hero: true, header: true },
@@ -321,6 +339,7 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "scarlet-nexus": { id: 775500, poster: true, hero: true, header: true },
   "schedule-i": { id: 3164500, poster: true, hero: true, header: true },
   "scrap-mechanic": { id: 387990, poster: true, hero: true, header: true },
+  "sea-of-stars": { id: 1244090, poster: true, hero: true, header: true },
   "sea-of-thieves": { id: 1172620, poster: true, hero: true, header: true },
   "sekiro-shadows-die-twice": { id: 814380, poster: true, hero: true, header: true },
   "shin-megami-tensei-v-vengeance": { id: 1875830, poster: true, hero: true, header: true },
@@ -357,6 +376,7 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "subnautica-below-zero": { id: 848450, poster: true, hero: true, header: true },
   "sunset-overdrive": { id: 847370, poster: true, hero: false, header: true },
   "superliminal": { id: 1049410, poster: true, hero: true, header: true },
+  "surviving-mars": { id: 464920, poster: true, hero: true, header: true },
   "tactics-ogre-reborn": { id: 1451090, poster: true, hero: true, header: true },
   "tales-of-arise": { id: 740130, poster: true, hero: true, header: true },
   "tales-of-graces-f-remastered": { id: 2530980, poster: true, hero: true, header: true },
@@ -383,6 +403,7 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "the-last-of-us-part-2": { id: 2531310, poster: true, hero: true, header: true },
   "the-legend-of-heroes-trails-through-daybreak": { id: 2138610, poster: true, hero: true, header: true },
   "the-long-dark": { id: 305620, poster: true, hero: true, header: true },
+  "the-outer-worlds": { id: 578650, poster: true, hero: true, header: true },
   "the-outlast-trials": { id: 1304930, poster: true, hero: true, header: true },
   "the-planet-crafter": { id: 1284190, poster: true, hero: true, header: true },
   "the-quarry": { id: 1577120, poster: true, hero: true, header: true },
@@ -437,17 +458,20 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "wreckfest": { id: 228380, poster: true, hero: true, header: true },
   "wuthering-waves": { id: 3513350, poster: false, hero: true, header: false },
   "wwe-2k24": { id: 2315690, poster: true, hero: true, header: true },
-  "wwe-2k25": { id: 2878960, poster: true, hero: true, header: true },
+  "wwe-2k25": { id: 2715730, poster: true, hero: true, header: true },
   "xcom-2": { id: 268500, poster: true, hero: true, header: true },
   "xcom-chimera-squad": { id: 882100, poster: true, hero: true, header: true },
+  "xenoblade-chronicles-3": { id: 602520, poster: true, hero: true, header: true },
+  "yakuza-0": { id: 2988580, poster: false, hero: true, header: false },
   "yakuza-like-a-dragon": { id: 1235140, poster: true, hero: true, header: true },
+  "zenless-zone-zero": { id: 4162040, poster: true, hero: true, header: true },
 };
 
 /** Kill switch: flip to false to render generated art everywhere again. */
 export const STEAM_ART_ENABLED = true;
 
 /** How many catalogue titles have storefront art. */
-export const STEAM_ART_TITLED = 422;
+export const STEAM_ART_TITLED = 438;
 
 const posterUrl = (id: number) =>
   `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${id}/library_600x900.jpg`;
@@ -469,8 +493,8 @@ export function steamArtFor(slug: string): SteamArtUrls | null {
   const entry = STEAM_ART[slug];
   if (!entry) return null;
   return {
-    poster: entry.poster ? posterUrl(entry.id) : null,
-    hero: entry.hero ? heroUrl(entry.id) : null,
-    header: entry.header ? headerUrl(entry.id) : null,
+    poster: entry.poster ? (entry.posterUrl ?? posterUrl(entry.id)) : null,
+    hero: entry.hero ? (entry.heroUrl ?? heroUrl(entry.id)) : null,
+    header: entry.header ? (entry.headerUrl ?? headerUrl(entry.id)) : null,
   };
 }

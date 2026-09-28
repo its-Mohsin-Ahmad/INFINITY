@@ -223,17 +223,38 @@ photography and always has a generated fallback:
 
 1. `npm run fetch:art` (`scripts/fetch-steam-art.mjs`) maps every catalogue
    title to a storefront app id, verifies which image assets actually resolve,
-   and writes `src/data/steam-art.ts`. Matching is exact-title only, so a wrong
-   cover can never be attached; results are cached in
-   `scripts/.steam-art-cache.json` and re-runs only retry the misses.
-2. The catalogue build fills `coverImage` (2:3 box art), `heroImage` (ultra-wide
+   and writes `src/data/steam-art.ts`. Matching accepts an exact title, or an
+   exact title plus a known edition suffix (`Enhanced`, `The Complete Edition`,
+   `Sunset Edition`, ...) peeled off the end - which is what catches
+   re-releases like *Grand Theft Auto IV: The Complete Edition* while still
+   refusing lookalikes such as *Minecraft* -> *Minecraft Dungeons*. Results are
+   cached in `scripts/.steam-art-cache.json`; re-runs only retry the misses, and
+   `npm run fetch:art -- --retry-missing` retries those explicitly.
+2. `APP_ID_OVERRIDES` in the same script holds a short list of hand-verified app
+   ids for titles the search endpoints handle badly. Every id there was looked
+   up on the store and kept only when the app's own name and artwork matched;
+   unverified guesses were deleted, because a wrong cover is worse than no
+   cover. Titles whose only store match is a *different* game (e.g. *The Outer
+   Worlds* searches to *The Outer Worlds 2*) are deliberately left out.
+3. Titles that publish art on a hashed CDN path - newer releases such as *Call
+   of Duty: Black Ops 6* - 404 on the predictable `library_*` URLs, so the
+   resolver falls back to `api/appdetails` and stores the real URL.
+4. The catalogue build fills `coverImage` (2:3 box art), `heroImage` (ultra-wide
    banner) and `headerImage` (landscape) from that index.
-3. `ArtImage` renders the photo and swaps in the `GameArt` SVG engine when a
-   title is console/mobile-only, when the image is blocked or offline, or when
+5. `ArtImage` renders the photo and swaps in the `GameArt` SVG engine when a
+   title has no storefront release, when the image is blocked or offline, or when
    `STEAM_ART_ENABLED` in `src/data/steam-art.ts` is flipped to `false`.
 
 Box art is hotlinked from the public storefront CDN, so it is never
 redistributed, and every page still renders without it.
+
+### Hero carousel
+
+`heroGames()` in `src/lib/catalogue/query.ts` drives the homepage reel. The
+order is hand-curated (`HERO_SLUGS`) rather than rating-sorted, so it leads with
+the marquee open-world/adventure franchises, and any entry without a hero image
+is skipped - a slide that silently falls back to generated art is a worse hero
+than the next title on the list.
 
 ---
 
@@ -241,6 +262,10 @@ redistributed, and every page still renders without it.
 
 - **Artwork is real where it can be, generated where it cannot.** See
   [Artwork](#artwork) above for the resolver, the fallback and the kill switch.
+  Titles with no PC storefront release - Nintendo and Sony exclusives, most
+  mobile and free-to-play service games - keep the generated art by design;
+  covering those with real photography needs a licensed provider (IGDB, RAWG)
+  rather than a better search.
 - **Static hosts cannot run route handlers.** On the Pages build, cart pricing
   falls back to the shared rule in the browser (see
   `src/lib/commerce/cart-line.ts`) and the newsletter opt-in is stored locally.
