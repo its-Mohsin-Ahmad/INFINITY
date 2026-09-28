@@ -3,19 +3,26 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
-import { ChevronRight, Play, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, Star } from "lucide-react";
 import type { Game } from "@/lib/types";
 import { ArtImage } from "@/components/art/ArtImage";
 import { Badge, PlatformPills, PriceTag } from "@/components/ui/primitives";
-import { AddToCartButton, WishlistButton } from "@/components/player/player-actions";
+import { WishlistButton } from "@/components/player/player-actions";
 import { genreName } from "@/data/taxonomy";
+import { compactNumber } from "@/lib/generate";
 
 /* ===========================================================================
  * Hero carousel
  * ---------------------------------------------------------------------------
- * Auto-advancing feature reel. Ken-Burns on the key art, keyboard accessible
- * rail, pauses on hover/focus. The progress bar restarts on every slide
- * because it is keyed by the game slug.
+ * Auto-advancing feature reel. Ken-Burns on the key art, arrow controls on the
+ * edges, a dot rail under the copy and a progress line along the bottom edge.
+ * Pauses on hover/focus. The progress bar restarts on every slide because it
+ * is keyed by the game slug.
+ *
+ * The copy block follows the storefront feature layout: eyebrow, marquee
+ * title, tagline, blurb, taxonomy row, score out of ten, platform row and the
+ * action row. The thumbnail rail is gone — slides are addressed through the
+ * edge arrows and the dots, which is what the reference layout asks for.
  * ======================================================================== */
 
 const DURATION = 7000;
@@ -32,6 +39,11 @@ export function HeroCarousel({ games }: { games: Game[] }) {
 
   if (!games.length) return null;
   const game = games[Math.min(index, games.length - 1)];
+  /** Trailer first, then any video: every marquee title ships a video centre. */
+  const trailer = game.videos.find((video) => video.category === "official-trailer") ?? game.videos[0];
+  /** The score is out of ten, the row of stars is out of five. */
+  const filledStars = Math.round(game.rating / 2);
+  const step = (delta: number) => setIndex((i) => (i + delta + games.length) % games.length);
 
   return (
     <section
@@ -81,42 +93,97 @@ export function HeroCarousel({ games }: { games: Game[] }) {
       })}
       {/*
         Legibility scrim. Tuned so the photograph stays clearly visible: the
-        copy side is dark enough for AA text, the right two thirds only get a
-        light wash plus a bottom falloff for the rail and progress bar.
+        copy side is dark enough for AA text, the top and right of the frame
+        only get a light wash, and the bottom carries the dot rail and the
+        progress line.
       */}
       <div className="absolute inset-0 bg-gradient-to-r from-bg-deep via-bg-deep/80 to-bg-deep/10 lg:via-bg-deep/55 lg:to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/25 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/30 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-b from-bg-deep/70 via-transparent to-transparent" />
-      {/* keeps the headline readable without flattening the whole frame */}
-      <div className="absolute inset-y-0 left-0 w-full max-w-[62%] bg-gradient-to-r from-bg-deep/85 to-transparent lg:max-w-[52%]" />
+      {/* keeps the copy readable without flattening the whole frame */}
+      <div className="absolute inset-y-0 left-0 w-full max-w-[88%] bg-gradient-to-r from-bg-deep/90 via-bg-deep/50 to-transparent lg:max-w-[58%]" />
       <div className="aura-accent absolute inset-0 opacity-60" />
 
-      <div className="shell relative flex min-h-[520px] flex-col justify-end gap-8 pb-10 pt-14 lg:min-h-[620px] lg:flex-row lg:items-end lg:justify-between lg:pb-14">
-        <div key={`${game.slug}-copy`} className="max-w-2xl animate-fade-up">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="eyebrow">Featured now</span>
+      {/* edge arrows - hidden on phones, where the dot rail below does the work */}
+      {games.length > 1 ? (
+        <>
+          <button
+            type="button"
+            onClick={() => step(-1)}
+            aria-label="Previous featured game"
+            className="absolute left-3 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 place-items-center border border-line bg-bg-deep/70 text-white backdrop-blur transition hover:border-accent hover:text-accent sm:grid lg:left-6"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => step(1)}
+            aria-label="Next featured game"
+            className="absolute right-3 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 place-items-center border border-line bg-bg-deep/70 text-white backdrop-blur transition hover:border-accent hover:text-accent sm:grid lg:right-6"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </>
+      ) : null}
+
+      <div className="shell relative flex min-h-[540px] flex-col justify-end pb-14 pt-24 sm:min-h-[600px] lg:min-h-[680px] lg:pb-16 lg:pt-28">
+        <div key={`${game.slug}-copy`} className="max-w-3xl animate-fade-up">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-2 border border-accent/60 bg-accent/15 px-2.5 py-1 font-display text-2xs font-bold uppercase tracking-[0.18em] text-white">
+              <span className="h-1.5 w-1.5 animate-pulse-glow rounded-full bg-accent" />
+              Featured game
+            </span>
             {game.isNew ? <Badge tone="new">New release</Badge> : null}
             {game.isTrending ? <Badge tone="live">Trending</Badge> : null}
             {game.isComingSoon ? <Badge tone="soon">Coming soon</Badge> : null}
           </div>
 
-          <h1 className="h-display mt-3 text-4xl sm:text-5xl xl:text-6xl">{game.title}</h1>
+          <h1 className="h-display mt-4 text-4xl sm:text-5xl xl:text-6xl">
+            <Link href={`/games/${game.slug}`} className="transition-colors hover:text-accent">
+              {game.title}
+            </Link>
+          </h1>
 
-          <p className="mt-3 font-display text-sm uppercase tracking-[0.18em] text-accent">
-            {game.tagline ?? game.shortDescription}
-          </p>
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-ink-secondary sm:text-base">
+          {game.tagline ? (
+            <p className="mt-3.5 font-display text-sm uppercase tracking-[0.18em] text-accent">{game.tagline}</p>
+          ) : null}
+
+          <p className="mt-3.5 max-w-2xl text-sm leading-relaxed text-ink-secondary sm:text-base">
             {game.shortDescription}
           </p>
 
-          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-secondary">
-            <span className="flex items-center gap-1.5 font-display font-bold text-white">
-              <Star className="h-3.5 w-3.5 fill-accent text-accent" />
-              {game.rating.toFixed(1)}
-              <span className="font-normal text-ink-muted">/ 10</span>
+          {/* taxonomy row - genres are pipe separated in the reference layout */}
+          <div className="mt-5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 font-display text-2xs font-bold uppercase tracking-[0.16em]">
+            {game.genre.slice(0, 3).map((genre, i) => (
+              <span key={genre} className="flex items-center gap-2.5">
+                {i > 0 ? (
+                  <span aria-hidden="true" className="text-ink-muted">
+                    |
+                  </span>
+                ) : null}
+                <Link href={`/categories/${genre}`} className="text-white transition hover:text-accent">
+                  {genreName(genre)}
+                </Link>
+              </span>
+            ))}
+          </div>
+
+          {/* score, review volume and provenance */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-secondary">
+            <span className="flex items-center gap-1.5" title={`INFINITY score ${game.rating.toFixed(1)} / 10`}>
+              <span className="flex items-center gap-0.5" aria-hidden="true">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={clsx("h-3.5 w-3.5", i < filledStars ? "fill-accent text-accent" : "text-ink-muted/50")}
+                  />
+                ))}
+              </span>
+              <span className="font-display font-bold text-white">{game.rating.toFixed(1)}</span>
+              <span className="text-ink-muted">/ 10</span>
             </span>
-            <span>{game.genre.slice(0, 3).map(genreName).join(" · ")}</span>
-            <span>{game.developer}</span>
+            <span>{compactNumber(game.reviewCount)} reviews</span>
+            <span className="hidden sm:inline">{game.developer}</span>
             <span>{game.releaseDate}</span>
           </div>
 
@@ -132,8 +199,20 @@ export function HeroCarousel({ games }: { games: Game[] }) {
               <Play className="h-4 w-4" />
               Explore game
             </Link>
-            <AddToCartButton game={game} platform={game.platforms[0] ?? null} className="w-auto min-w-[190px]" />
-            <WishlistButton game={game} variant="wide" />
+            {trailer ? (
+              <a
+                href={trailer.officialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 border border-line bg-bg-deep/40 px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white backdrop-blur transition hover:border-accent hover:text-accent"
+              >
+                <Play className="h-3.5 w-3.5 fill-current" />
+                Watch trailer
+              </a>
+            ) : null}
+            <div className="min-w-[190px] flex-1 sm:flex-none">
+              <WishlistButton game={game} variant="wide" />
+            </div>
             <div className="hidden border-l border-line pl-4 sm:block">
               <PriceTag
                 price={game.price}
@@ -144,41 +223,31 @@ export function HeroCarousel({ games }: { games: Game[] }) {
               />
             </div>
           </div>
+        </div>
 
-          <div className="mt-8 h-px w-full max-w-md overflow-hidden bg-line">
-            <div key={`${game.slug}-progress`} className="hero-progress" />
+        {/* dot rail - one control per slide, centred under the copy */}
+        {games.length > 1 ? (
+          <div className="relative mt-9 flex flex-wrap items-center justify-center gap-2">
+            {games.map((item, i) => (
+              <button
+                key={item.slug}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={`Show ${item.title}`}
+                aria-current={i === index}
+                className={clsx(
+                  "h-1.5 rounded-full transition-all duration-300",
+                  i === index ? "w-7 bg-accent" : "w-1.5 bg-white/30 hover:bg-white/60",
+                )}
+              />
+            ))}
           </div>
-        </div>
+        ) : null}
+      </div>
 
-        {/* selection rail */}
-        <div className="no-scrollbar flex w-full shrink-0 gap-2 overflow-x-auto lg:w-[248px] lg:flex-col lg:overflow-visible">
-          {games.map((item, i) => (
-            <button
-              key={item.slug}
-              type="button"
-              onClick={() => setIndex(i)}
-              aria-label={`Show ${item.title}`}
-              aria-current={i === index}
-              className={clsx(
-                "group relative flex h-16 w-28 shrink-0 items-end overflow-hidden border transition lg:h-[68px] lg:w-full",
-                i === index ? "border-accent" : "border-line opacity-60 hover:opacity-100",
-              )}
-            >
-              <ArtImage game={item} variant="thumb" showTitle={false} className="h-full w-full" />
-              <span className="relative w-full truncate bg-gradient-to-t from-bg-deep to-transparent px-2 pb-1.5 pt-4 text-left font-display text-2xs font-bold uppercase tracking-wider text-white">
-                {item.title}
-              </span>
-              {i === index ? <span className="absolute inset-x-0 top-0 h-0.5 bg-accent" /> : null}
-            </button>
-          ))}
-          <Link
-            href="/games"
-            className="flex h-16 w-28 shrink-0 items-center justify-center gap-1 border border-line px-2 font-display text-2xs font-bold uppercase tracking-[0.14em] text-ink-secondary transition hover:border-accent hover:text-white lg:h-[68px] lg:w-full"
-          >
-            All games
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
+      {/* autoplay progress - keyed by slug so every slide restarts the line */}
+      <div className="absolute inset-x-0 bottom-0 z-20 h-[2px] overflow-hidden bg-line/50">
+        <div key={`${game.slug}-progress`} className="hero-progress" />
       </div>
     </section>
   );
