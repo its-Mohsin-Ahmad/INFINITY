@@ -10,6 +10,8 @@ import { compactNumber } from "@/lib/generate";
  * ======================================================================== */
 
 const SOCIAL_PATHS: Record<string, string> = {
+  facebook:
+    "M13.5 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.3-1.6 1.6-1.6h1.7V3c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.3v3.2h2.8V21h3.4Z",
   discord:
     "M20.3 4.6a16.6 16.6 0 0 0-4.1-1.3l-.3.6a12.4 12.4 0 0 0-3.8 0l-.3-.6a16.6 16.6 0 0 0-4.1 1.3C4.9 8.2 4.2 11.7 4.5 15.1a16.7 16.7 0 0 0 5 2.5l.6-1a10.8 10.8 0 0 1-1.7-.8l.4-.3a11.9 11.9 0 0 0 10.2 0l.4.3c-.5.3-1.1.6-1.7.8l.6 1a16.7 16.7 0 0 0 5-2.5c.4-4-.7-7.4-3-10.5ZM9.8 13.2c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm4.4 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z",
   youtube:
@@ -85,8 +87,9 @@ export function Footer() {
             <NewsletterForm />
           </div>
 
-          {/* Social icons live here and nowhere else in the product. */}
-          <div className="mt-6 flex flex-wrap gap-2">
+          {/* Social icons live here and nowhere else in the product (§51). */}
+          <p className="mt-6 font-display text-xs font-bold uppercase tracking-[0.16em] text-white">Follow INFINITY</p>
+          <div className="mt-3 flex flex-wrap gap-2">
             {SOCIAL_LINKS.map((s) => (
               <a
                 key={s.label}

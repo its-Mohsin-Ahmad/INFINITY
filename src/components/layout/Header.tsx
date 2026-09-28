@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import {
   ChevronDown,
@@ -17,6 +17,8 @@ import {
   X,
 } from "lucide-react";
 import { PRIMARY_NAV, UTILITY_LINKS, type NavItem } from "@/lib/nav";
+import { POPULAR_SEARCHES, loadSearchIndex, scoreHits, type SearchHit } from "@/lib/search-index";
+import { genreName } from "@/data/taxonomy";
 import { useCartTotals, usePlayer } from "@/lib/store/player-store";
 
 /* ===========================================================================
@@ -324,8 +326,147 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
   );
 }
 
+/**
+ * Global search overlay (§8) — opens over the page, matches against the same
+ * trimmed index the /search route uses, and never leaves the homepage.
+ */
+function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [q, setQ] = useState("");
+  const [hits, setHits] = useState<SearchHit[] | null>(null);
+
+  /** Fetch the index once, on first open — the homepage never pays for it. */
+  useEffect(() => {
+    if (!open || hits !== null) return;
+    let alive = true;
+    loadSearchIndex()
+      .then((rows) => alive && setHits(rows))
+      .catch(() => alive && setHits([]));
+    return () => {
+      alive = false;
+    };
+  }, [open, hits]);
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    inputRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  const suggestions = useMemo(
+    () => (q.trim().length >= 2 && hits ? scoreHits(q, hits, 6) : []),
+    [q, hits],
+  );
+
+  const go = (path: string) => {
+    onClose();
+    router.push(path);
+  };
+
+  return (
+    <div className={clsx("fixed inset-0 z-[90]", open ? "" : "pointer-events-none")} aria-hidden={!open}>
+      <div
+        onClick={onClose}
+        className={clsx("absolute inset-0 bg-black/80 backdrop-blur-sm transition duration-300", open ? "opacity-100" : "opacity-0")}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search INFINITY"
+        className={clsx(
+          "absolute inset-x-0 top-0 border-b border-accent/40 bg-bg-nav/98 shadow-panel transition duration-300",
+          open ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0",
+        )}
+      >
+        <div className="shell py-6">
+          <div className="flex items-center gap-3 border-b border-line pb-4">
+            <Search className="h-5 w-5 shrink-0 text-accent" aria-hidden="true" />
+            <input
+              ref={inputRef}
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  go(`/search?q=${encodeURIComponent(q.trim())}`);
+                }
+              }}
+              placeholder="Search 450+ games, genres, developers…"
+              aria-label="Search games"
+              className="h-10 min-w-0 flex-1 bg-transparent font-display text-lg text-white outline-none placeholder:text-ink-muted sm:text-2xl"
+            />
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close search"
+              className="grid h-9 w-9 shrink-0 place-items-center border border-line text-ink-secondary transition hover:border-accent hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {suggestions.length ? (
+            <ul className="mt-4 divide-y divide-line border border-line bg-bg-deep/60">
+              {suggestions.map((hit) => (
+                <li key={hit.slug}>
+                  <button
+                    type="button"
+                    onClick={() => go(`/games/${hit.slug}`)}
+                    className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left transition hover:bg-bg-card"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-white">{hit.title}</span>
+                      <span className="block truncate text-2xs text-ink-muted">
+                        {genreName(hit.genre[0])} · {hit.developer}
+                      </span>
+                    </span>
+                    <span className="font-display text-2xs tabular-nums text-accent">{hit.rating.toFixed(1)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="mt-4">
+              <p className="text-2xs uppercase tracking-[0.16em] text-ink-muted">Popular searches</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {POPULAR_SEARCHES.map((term) => (
+                  <button
+                    key={term}
+                    type="button"
+                    onClick={() => go(`/search?q=${encodeURIComponent(term)}`)}
+                    className="border border-line px-3 py-1.5 text-xs text-ink-secondary transition hover:border-accent hover:text-white"
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {q.trim().length >= 2 && suggestions.length === 0 && hits ? (
+            <p className="mt-4 text-sm text-ink-secondary">
+              No matches for “{q.trim()}” — press Enter to open full results.
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { count } = useCartTotals();
@@ -363,7 +504,14 @@ export function Header() {
         <DesktopNav items={PRIMARY_NAV} />
 
         <div className="ml-auto flex items-center gap-2">
-          <SearchField className="hidden w-[210px] xl:flex" />
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search games"
+            className="grid h-9 w-9 place-items-center border border-line text-white transition hover:border-accent hover:text-accent"
+          >
+            <Search className="h-4 w-4" />
+          </button>
           <Link
             href="/dashboard/wishlist"
             aria-label="Wishlist"
@@ -391,6 +539,7 @@ export function Header() {
       </div>
 
       <MobileDrawer open={open} onClose={() => setOpen(false)} mounted={mounted} />
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
 }

@@ -4,13 +4,14 @@
   "private": true,
   "description": "INFINITY - ONE UNIVERSE. INFINITE GAMES. A complete global gaming ecosystem.",
   "scripts": {
-    "dev": "node scripts/prepare-api.mjs && next dev",
+    "dev": "node scripts/prepare-api.mjs && node scripts/generate-search-index.mjs && next dev",
     "build": "node scripts/infinity-build.mjs",
     "build:static": "node scripts/infinity-build.mjs --static",
     "deploy:pages": "node scripts/infinity-build.mjs --static && node scripts/deploy-pages.mjs",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "verify": "node scripts/verify-database.mjs",
+    "index:search": "node scripts/generate-search-index.mjs",
     "fetch:art": "node scripts/fetch-steam-art.mjs"
   },
   "dependencies": {

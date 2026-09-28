@@ -24,6 +24,20 @@ if (staticExport) {
   restoreApi();
 }
 
+// The browser fetches this at runtime — regenerate so search always matches
+// the catalogue being built (also keeps ./public fresh for the export copy).
+{
+  // No `shell: true` here: process.execPath contains a space on Windows
+  // ("C:\Program Files\...") and the shell would split it mid-path.
+  const indexResult = spawnSync(process.execPath, ["scripts/generate-search-index.mjs"], {
+    stdio: "inherit",
+  });
+  if (indexResult.status !== 0) {
+    restoreApi();
+    process.exit(indexResult.status ?? 1);
+  }
+}
+
 const command = process.platform === "win32" ? "npx.cmd" : "npx";
 const result = spawnSync(command, ["next", "build"], {
   stdio: "inherit",

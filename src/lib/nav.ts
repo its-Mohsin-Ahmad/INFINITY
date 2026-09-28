@@ -179,11 +179,12 @@ export const FOOTER_COLUMNS: { title: string; links: NavChild[] }[] = [
  * never in the top bar, navbar, hero, cards or dashboard surfaces.
  */
 export const SOCIAL_LINKS: { label: string; href: string; icon: string }[] = [
-  { label: "Discord", href: "https://discord.com", icon: "discord" },
-  { label: "YouTube", href: "https://www.youtube.com", icon: "youtube" },
-  { label: "X", href: "https://x.com", icon: "x" },
-  { label: "Twitch", href: "https://www.twitch.tv", icon: "twitch" },
+  { label: "Facebook", href: "https://www.facebook.com", icon: "facebook" },
   { label: "Instagram", href: "https://www.instagram.com", icon: "instagram" },
+  { label: "X", href: "https://x.com", icon: "x" },
+  { label: "YouTube", href: "https://www.youtube.com", icon: "youtube" },
+  { label: "Discord", href: "https://discord.com", icon: "discord" },
+  { label: "Twitch", href: "https://www.twitch.tv", icon: "twitch" },
   { label: "TikTok", href: "https://www.tiktok.com", icon: "tiktok" },
   { label: "Reddit", href: "https://www.reddit.com", icon: "reddit" },
   { label: "LinkedIn", href: "https://www.linkedin.com", icon: "linkedin" },
