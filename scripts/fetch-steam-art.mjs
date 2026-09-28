@@ -30,6 +30,17 @@ const FUZZY = args.has("--fuzzy");
 /** Re-resolve titles that are cached as "no art" (used after a throttled run). */
 const RETRY_MISSING = args.has("--retry-missing");
 const LIMIT = Number(process.argv.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? NaN);
+/**
+ * Resolve only these titles, comma separated: --only="Quantum Break,Sunset Overdrive".
+ * Re-resolving a handful of records otherwise means a full sweep of every
+ * unmatched title, which is ~25 minutes of rate-limited requests.
+ */
+const ONLY = process.argv
+  .find((a) => a.startsWith("--only="))
+  ?.slice("--only=".length)
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 const CONCURRENCY = Number(process.env.ART_CONCURRENCY ?? 5);
 const DELAY = Number(process.env.ART_DELAY ?? 120);
 
@@ -63,6 +74,86 @@ const DELAY = Number(process.env.ART_DELAY ?? 120);
  * store match is a different game - "The Outer Worlds" searches to
  * "The Outer Worlds 2", which would put the sequel cover on the original.
  */
+/**
+ * SteamSpy appid -> name index, cached on disk.
+ *
+ * The store's own search endpoint became unreliable mid-build: a query for
+ * "VALORANT" came back with Aimlabs and Bellwright, and the bulk GetAppList/v2
+ * endpoint now 404s, so nothing legitimate was left for the matcher to accept.
+ * SteamSpy still serves the full app list (owner-ranked, ~82k titles), which
+ * makes it usable as an *offline* dictionary: match here, then confirm the
+ * candidate against api/appdetails before it is written to src/data/steam-art.ts.
+ *
+ * Cached because the full sweep is ~90 requests and the answer only changes
+ * when the catalogue does.
+ */
+const INDEX_CACHE = new URL("./.steam-app-index.json", import.meta.url);
+const SPY_PAGES = 100;
+const SPY_PAGE_SIZE = 1000;
+
+async function loadAppIndex() {
+  try {
+    const cached = JSON.parse(readFileSync(INDEX_CACHE, "utf8"));
+    if (Array.isArray(cached) && cached.length > 1000) return cached;
+  } catch {
+    /* no usable cache - fall through and fetch */
+  }
+
+  console.log(`[art] building the SteamSpy app index (${SPY_PAGES} pages)...`);
+  const UA = {
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    "accept-language": "en-US,en;q=0.9",
+  };
+  const out = [];
+  for (let page = 0; page < SPY_PAGES; page++) {
+    try {
+      const res = await fetch(
+        `https://steamspy.com/api.php?request=all&page=${page}`,
+        { headers: UA },
+      );
+      if (!res.ok) break;
+      const payload = await res.json();
+      for (const app of Object.values(payload ?? {})) {
+        if (app && typeof app.appid === "number" && typeof app.name === "string") {
+          out.push([app.appid, app.name]);
+        }
+      }
+      if (page % 20 === 0) console.log(`[art]   index page ${page} (${out.length} titles)`);
+    } catch (err) {
+      console.warn(`[art]   index page ${page} failed: ${err.message}`);
+    }
+    await sleep(350);
+  }
+
+  if (out.length > 1000) {
+    writeFileSync(INDEX_CACHE, JSON.stringify(out));
+    console.log(`[art] index cached: ${out.length} app ids`);
+  }
+  return out;
+}
+
+/**
+ * Exact and edition-match candidates from the offline index, shaped like a
+ * store search result so the rest of the pipeline is unchanged.
+ */
+async function indexCandidates(target) {
+  const index = await loadAppIndex();
+  const exact = [];
+  const editions = [];
+  for (const [appid, name] of index) {
+    const n = normalize(name);
+    if (n === target) {
+      exact.push({ appid, name });
+    } else if (n.startsWith(target) && n.length > target.length) {
+      // Only accept a real edition suffix, not a longer unrelated title.
+      editions.push({ appid, name });
+    }
+  }
+  // Prefer the plainest edition: "Foo" beat "Foo: Legendary Edition".
+  editions.sort((a, b) => a.name.length - b.name.length);
+  return { exact, editions: editions.slice(0, 5) };
+}
+
 const APP_ID_OVERRIDES = {
   "Call of Duty: Black Ops 6": 4384550,
 
@@ -458,6 +549,17 @@ async function resolveTitle(title) {
   }
 
   let hit = found(candidates);
+
+  // 4) Offline dictionary. The store searches above cost several requests each
+  //    and started answering with unrelated titles, so before giving up we try
+  //    the cached SteamSpy app list, which needs no network at all. Candidates
+  //    are still confirmed against api/appdetails below, so a stale or
+  //    mislabelled index entry cannot slip through.
+  if (!hit) {
+    const fromIndex = await indexCandidates(target);
+    hit = found([...fromIndex.exact, ...fromIndex.editions].map((c) => ({ id: c.appid, name: c.name })));
+  }
+
   if (!hit && FUZZY) {
     hit = candidates
       .map((c) => ({ c, score: similarity(target, normalize(c.name)) }))
@@ -546,6 +648,22 @@ const overrides = readSlugOverrides();
 const slugFor = (title) => overrides[title] ?? slugify(title);
 
 let titles = readTitles();
+/**
+ * The full catalogue, kept for serialisation. `titles` is narrowed by --only /
+ * --limit / --retry-missing so a run does fewer requests, but the generated
+ * file must always describe *every* title the cache knows about - building the
+ * rows from the narrowed list silently truncated steam-art.ts down to whatever
+ * subset happened to run.
+ */
+const allTitles = titles;
+if (ONLY) {
+  const wanted = new Set(ONLY.map(normalize));
+  titles = titles.filter((t) => wanted.has(normalize(t)));
+  if (!titles.length) {
+    console.error(`[art] --only matched no catalogue title. Tried: ${ONLY.join(", ")}`);
+    process.exit(1);
+  }
+}
 if (Number.isFinite(LIMIT)) titles = titles.slice(0, LIMIT);
 console.log(`[art] ${titles.length} unique titles in the catalogue`);
 
@@ -622,14 +740,32 @@ async function auditRows(rows) {
     Array.from({ length: Math.min(6, rows.length) }, async () => {
       while (cursor < rows.length) {
         const row = rows[cursor++];
-        const url =
-          row.urls?.hero || row.urls?.poster || row.urls?.header || HERO(row.id);
+        // Accept the row if *any* asset it claims actually resolves. Testing a
+        // single URL (hero first) used to drop titles whose hero art is absent
+        // but whose poster and header are fine - "Quantum Break" and "Sunset
+        // Overdrive" were both removed that way even though their box art is
+        // live, which is a worse outcome than a missing hero.
+        //
+        // `urls` is only populated on the appdetails fallback path, so the
+        // conventional paths have to be rebuilt from the per-asset flags.
+        const pick = (flag, url, conventional) =>
+          row.urls?.[flag] ?? (row[flag] ? conventional(row.id) : null);
+        const urls = [
+          pick("poster", null, POSTER),
+          pick("header", null, HEADER),
+          pick("hero", null, HERO),
+        ].filter(Boolean);
+        if (!urls.length) urls.push(HERO(row.id));
         let ok = false;
-        try {
-          const head = await assetExists(url);
-          ok = head === true;
-        } catch {
-          ok = false;
+        for (const url of urls) {
+          try {
+            if ((await assetExists(url)) === true) {
+              ok = true;
+              break;
+            }
+          } catch {
+            /* try the next asset */
+          }
         }
         if (ok) {
           kept.push(row);
@@ -650,7 +786,7 @@ async function auditRows(rows) {
 }
 
 const seen = new Set();
-const rows = titles
+const rows = allTitles
   // A cache entry only counts when it carries a real app id: a failed override
   // stores `{ id: null, matched }`, which is a truthy object and would otherwise
   // be emitted as an entry with undefined asset flags.
@@ -744,7 +880,7 @@ export function steamArtFor(slug: string): SteamArtUrls | null {
 writeFileSync(OUT_PATH, out);
 
 console.log(
-  `[art] wrote src/data/steam-art.ts - ${rows.length}/${titles.length} titles matched ` +
+  `[art] wrote src/data/steam-art.ts - ${rows.length}/${allTitles.length} titles matched ` +
     `(${rows.filter((r) => r.poster).length} poster, ${rows.filter((r) => r.hero).length} hero, ` +
     `${rows.filter((r) => r.header).length} header)`,
 );

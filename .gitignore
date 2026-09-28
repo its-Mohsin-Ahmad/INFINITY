@@ -20,3 +20,7 @@ scripts/.steam-art-cache.json
 spy_*.json
 spy-index.json
 *.log
+
+# Generated appid index for scripts/fetch-steam-art.mjs. ~2.5 MB of SteamSpy
+# owner-ranked data; rebuild it with the index step rather than committing it.
+scripts/.steam-app-index.json

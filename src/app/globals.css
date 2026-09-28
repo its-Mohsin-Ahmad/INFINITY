@@ -236,4 +236,134 @@ video {
   }
 }
 
+/* ===========================================================================
+   Boot splash
+   ---------------------------------------------------------------------------
+   Key art for the loading screen: a slow orbital sweep, a breathing glow on the
+   infinity mark, drifting debris and a travelling highlight along the progress
+   bar. All of it is transform/opacity only, so the splash stays cheap and
+   never blocks the first paint of the page underneath.
+   ======================================================================== */
+
+/* Infinite space drift behind the splash. */
+@keyframes boot-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-2%, 1.5%, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Planet limb on the right edge, lit from behind. */
+@keyframes boot-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The infinity mark breathes like a hot filament. */
+@keyframes boot-mark {
+  0%,
+  100% {
+    opacity: 0.92;
+    filter: drop-shadow(0 0 14px rgba(229, 9, 47, 0.55)) drop-shadow(0 0 44px rgba(229, 9, 47, 0.3));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 22px rgba(255, 23, 68, 0.75)) drop-shadow(0 0 70px rgba(229, 9, 47, 0.42));
+  }
+}
+
+/* Energy running along the infinity stroke. */
+@keyframes boot-energy {
+  from {
+    stroke-dashoffset: 240;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Debris and dust slowly falling through frame. */
+@keyframes boot-fall {
+  0% {
+    transform: translate3d(0, -12vh, 0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 112vh, 0);
+    opacity: 0;
+  }
+}
+
+/* Wordmark reveal. */
+@keyframes boot-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Specular highlight travelling along the filled progress bar. */
+@keyframes boot-sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+/* Bind the keyframes above to the classes used by the splash. */
+.boot-drift {
+  animation: boot-drift 24s ease-in-out infinite;
+}
+.boot-orbit {
+  animation: boot-orbit 64s linear infinite;
+}
+.boot-mark {
+  animation: boot-mark 2.6s ease-in-out infinite;
+}
+.boot-energy {
+  animation: boot-energy 2.6s linear infinite;
+}
+.boot-fall {
+  animation: boot-fall linear infinite;
+}
+.boot-rise {
+  animation: boot-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.boot-sheen {
+  animation: boot-sheen 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-drift,
+  .boot-orbit,
+  .boot-mark,
+  .boot-energy,
+  .boot-fall,
+  .boot-rise,
+  .boot-sheen {
+    animation: none !important;
+  }
+}
+
 

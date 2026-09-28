@@ -55,10 +55,17 @@ export function HeroCarousel({ games }: { games: Game[] }) {
           />
         </div>
       </div>
-      {/* legibility: real key art is bright, so the copy side is darkened hard */}
-      <div className="absolute inset-0 bg-gradient-to-r from-bg-deep via-bg-deep/92 to-bg-deep/25" />
-      <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-bg-deep/70" />
-      <div className="aura-accent absolute inset-0" />
+      {/*
+        Legibility scrim. Tuned so the photograph stays clearly visible: the
+        copy side is dark enough for AA text, the right two thirds only get a
+        light wash plus a bottom falloff for the rail and progress bar.
+      */}
+      <div className="absolute inset-0 bg-gradient-to-r from-bg-deep via-bg-deep/80 to-bg-deep/10 lg:via-bg-deep/55 lg:to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/25 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-bg-deep/70 via-transparent to-transparent" />
+      {/* keeps the headline readable without flattening the whole frame */}
+      <div className="absolute inset-y-0 left-0 w-full max-w-[62%] bg-gradient-to-r from-bg-deep/85 to-transparent lg:max-w-[52%]" />
+      <div className="aura-accent absolute inset-0 opacity-60" />
 
       <div className="shell relative flex min-h-[520px] flex-col justify-end gap-8 pb-10 pt-14 lg:min-h-[620px] lg:flex-row lg:items-end lg:justify-between lg:pb-14">
         <div key={`${game.slug}-copy`} className="max-w-2xl animate-fade-up">

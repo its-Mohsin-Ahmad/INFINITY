@@ -1,6 +1,6 @@
 import Link from "next/link";
 import clsx from "clsx";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Play } from "lucide-react";
 import type { Game } from "@/lib/types";
 import { ArtImage } from "@/components/art/ArtImage";
 import { Badge, PlatformPills, PriceTag, ScoreBadge } from "@/components/ui/primitives";
@@ -48,8 +48,9 @@ export function GameCard({
           className="h-full w-full transition-transform duration-500 group-hover:scale-[1.07]"
         />
 
-        {/* legibility scrim: real box art can be bright or busy */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/35 to-bg-deep/10" />
+        {/* legibility scrim: real box art can be bright or busy. Kept light at
+            the top so the artwork reads, heavier under the title block. */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/20 to-bg-deep/25" />
 
         {/* specular sweep */}
         <span className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-2/3 group-hover:opacity-100" />
@@ -67,10 +68,17 @@ export function GameCard({
           </div>
         </div>
 
-        {/* hover call to action */}
-        <span className="pointer-events-none absolute inset-x-2.5 bottom-2.5 hidden translate-y-3 items-center justify-center gap-1.5 bg-accent/95 py-2 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 sm:flex">
+        {/*
+          Primary card CTA. Always rendered so it is discoverable without a
+          pointer (and visible at every breakpoint), then expands on hover.
+        */}
+        <span className="absolute left-1/2 top-[46%] z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/15 bg-gradient-to-r from-accent to-accent-bright py-2 pl-3 pr-2 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-white shadow-[0_8px_24px_rgba(0,0,0,0.6)] transition-all duration-300 group-hover:border-white/40 group-hover:shadow-[0_10px_30px_rgba(229,9,47,0.5)] sm:text-[11px]">
+          <span className="relative flex h-4 w-4 items-center justify-center rounded-full bg-white/22">
+            <span className="absolute inset-0 animate-ping rounded-full bg-white/35" />
+            <Play className="relative h-2.5 w-2.5 fill-white text-white" />
+          </span>
           View game
-          <ChevronRight className="h-3.5 w-3.5" />
+          <ChevronRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
         </span>
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col p-3">
