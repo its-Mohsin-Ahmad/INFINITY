@@ -109,6 +109,17 @@ body[data-scroll-locked="true"] {
     @apply h-px w-full bg-gradient-to-r from-accent via-accent/40 to-transparent;
   }
 
+  /* Centre-labelled section rule: thin red line either side of a small label. */
+  .divider-label {
+    @apply flex items-center gap-3 font-display text-2xs font-bold uppercase tracking-[0.22em] text-ink-muted;
+  }
+
+  .divider-label::before,
+  .divider-label::after {
+    content: "";
+    @apply h-px flex-1 bg-gradient-to-r from-transparent via-accent/45 to-transparent;
+  }
+
   .panel {
     @apply border border-line bg-bg-card/70 backdrop-blur-[2px];
   }

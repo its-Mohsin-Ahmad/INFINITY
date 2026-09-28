@@ -84,6 +84,14 @@ const config: Config = {
           "0%": { transform: "scale(1.04) translate3d(0,0,0)" },
           "100%": { transform: "scale(1.16) translate3d(-1.5%, -1.2%, 0)" },
         },
+        /**
+         * Hero ken burns. Deliberately gentle (100% → 106%) so faces and
+         * character silhouettes never crop out of the frame on a 16:7 hero.
+         */
+        "hero-zoom": {
+          "0%": { transform: "scale(1.005)" },
+          "100%": { transform: "scale(1.06)" },
+        },
         shimmer: {
           "100%": { transform: "translateX(100%)" },
         },
@@ -106,6 +114,7 @@ const config: Config = {
         "fade-right": "fade-right 0.5s cubic-bezier(0.22,1,0.36,1) both",
         "scale-in": "scale-in 0.28s cubic-bezier(0.22,1,0.36,1) both",
         kenburns: "kenburns 14s ease-out both",
+        "hero-zoom": "hero-zoom 12s ease-out both",
         shimmer: "shimmer 1.6s infinite",
         "pulse-glow": "pulse-glow 3.4s ease-in-out infinite",
         "spin-slow": "spin-slow 18s linear infinite",

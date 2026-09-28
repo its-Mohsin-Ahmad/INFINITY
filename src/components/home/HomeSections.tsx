@@ -58,6 +58,10 @@ export function PlatformDiscovery() {
               {(counts.get(p.name) ?? 0).toLocaleString()}
             </p>
             <p className="text-2xs uppercase tracking-wider text-ink-muted">games</p>
+            <span className="mt-3 flex items-center gap-1 text-2xs font-bold uppercase tracking-[0.14em] text-ink-muted transition group-hover:text-accent">
+              View games
+              <ArrowUpRight className="h-3 w-3 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </span>
           </Link>
         ))}
       </div>
@@ -128,14 +132,14 @@ export function EcosystemBand() {
       icon: Download,
       title: "INFINITY Launcher",
       body: "One client for every storefront: unified library, patch manager, mod manager and cloud saves.",
-      href: "/launcher",
-      cta: "Download for Windows",
+      href: "/store",
+      cta: "Get INFINITY",
     },
     {
       icon: Ticket,
       title: "INFINITY Pass",
       body: "One membership, hundreds of titles, day-one releases and member-only discounts in the store.",
-      href: "/game-pass",
+      href: "/deals",
       cta: "See plans",
     },
     {

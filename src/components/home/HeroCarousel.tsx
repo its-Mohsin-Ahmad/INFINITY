@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
-import { ChevronLeft, ChevronRight, Play, Star } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play, Star } from "lucide-react";
 import type { Game } from "@/lib/types";
 import { ArtImage } from "@/components/art/ArtImage";
 import { Badge, PlatformPills, PriceTag } from "@/components/ui/primitives";
+import { TrailerButton } from "@/components/home/TrailerModal";
 import { WishlistButton } from "@/components/player/player-actions";
 import { genreName } from "@/data/taxonomy";
 import { compactNumber } from "@/lib/generate";
@@ -29,7 +30,10 @@ const DURATION = 7000;
 
 export function HeroCarousel({ games }: { games: Game[] }) {
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
+  /** `hovering` covers the pointer and focus; `held` is the manual pause toggle. */
+  const [hovering, setHovering] = useState(false);
+  const [held, setHeld] = useState(false);
+  const paused = hovering || held;
 
   useEffect(() => {
     if (paused || games.length < 2) return;
@@ -37,10 +41,38 @@ export function HeroCarousel({ games }: { games: Game[] }) {
     return () => window.clearInterval(id);
   }, [paused, games.length]);
 
+  /*
+   * Keyboard navigation (WCAG 2.1.1): ArrowLeft/ArrowRight page through the
+   * reel from anywhere on the page, Space holds or resumes it. Typing targets
+   * and the trailer dialog are excluded so a keypress is never stolen mid-form
+   * or mid-video, and Space is ignored while a button or link holds focus so
+   * native activation still wins.
+   */
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (target) {
+        const tag = target.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable) return;
+        if (target.closest('[role="dialog"]')) return;
+        if (event.key === " " && (tag === "BUTTON" || tag === "A")) return;
+      }
+      if (event.key === "ArrowRight") {
+        setIndex((i) => (i + 1) % games.length);
+      } else if (event.key === "ArrowLeft") {
+        setIndex((i) => (i - 1 + games.length) % games.length);
+      } else if (event.key === " ") {
+        event.preventDefault();
+        setHeld((value) => !value);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [games.length]);
+
   if (!games.length) return null;
   const game = games[Math.min(index, games.length - 1)];
-  /** Trailer first, then any video: every marquee title ships a video centre. */
-  const trailer = game.videos.find((video) => video.category === "official-trailer") ?? game.videos[0];
   /** The score is out of ten, the row of stars is out of five. */
   const filledStars = Math.round(game.rating / 2);
   const step = (delta: number) => setIndex((i) => (i + delta + games.length) % games.length);
@@ -51,10 +83,10 @@ export function HeroCarousel({ games }: { games: Game[] }) {
       data-paused={paused}
       aria-roledescription="carousel"
       aria-label="Featured games"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      onFocusCapture={() => setHovering(true)}
+      onBlurCapture={() => setHovering(false)}
     >
       {/*
         Every slide stays mounted and is cross-faded with opacity. Mounting only
@@ -79,7 +111,7 @@ export function HeroCarousel({ games }: { games: Game[] }) {
               active ? "opacity-100" : "opacity-0",
             )}
           >
-            <div className={clsx("h-full w-full", active && "animate-kenburns")}>
+            <div className={clsx("h-full w-full", active && "animate-hero-zoom")}>
               <ArtImage
                 game={item}
                 variant="hero"
@@ -196,19 +228,15 @@ export function HeroCarousel({ games }: { games: Game[] }) {
               href={`/games/${game.slug}`}
               className="inline-flex items-center gap-2 bg-accent px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
             >
-              <Play className="h-4 w-4" />
-              Explore game
+              View game
+              <ArrowRight className="h-4 w-4" />
             </Link>
-            {trailer ? (
-              <a
-                href={trailer.officialUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+            {game.videos.length ? (
+              <TrailerButton
+                game={game}
+                videos={game.videos}
                 className="inline-flex items-center gap-2 border border-line bg-bg-deep/40 px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white backdrop-blur transition hover:border-accent hover:text-accent"
-              >
-                <Play className="h-3.5 w-3.5 fill-current" />
-                Watch trailer
-              </a>
+              />
             ) : null}
             <div className="min-w-[190px] flex-1 sm:flex-none">
               <WishlistButton game={game} variant="wide" />
@@ -225,22 +253,39 @@ export function HeroCarousel({ games }: { games: Game[] }) {
           </div>
         </div>
 
-        {/* dot rail - one control per slide, centred under the copy */}
+        {/* dot rail + slide counter + manual pause toggle, centred under the copy */}
         {games.length > 1 ? (
-          <div className="relative mt-9 flex flex-wrap items-center justify-center gap-2">
-            {games.map((item, i) => (
-              <button
-                key={item.slug}
-                type="button"
-                onClick={() => setIndex(i)}
-                aria-label={`Show ${item.title}`}
-                aria-current={i === index}
-                className={clsx(
-                  "h-1.5 rounded-full transition-all duration-300",
-                  i === index ? "w-7 bg-accent" : "w-1.5 bg-white/30 hover:bg-white/60",
-                )}
-              />
-            ))}
+          <div className="relative mt-9 flex flex-wrap items-center justify-center gap-4">
+            <span
+              aria-hidden="true"
+              className="hidden font-display text-2xs font-bold tabular-nums tracking-[0.2em] text-ink-muted sm:block"
+            >
+              {String(index + 1).padStart(2, "0")} / {String(games.length).padStart(2, "0")}
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {games.map((item, i) => (
+                <button
+                  key={item.slug}
+                  type="button"
+                  onClick={() => setIndex(i)}
+                  aria-label={`Show ${item.title}`}
+                  aria-current={i === index}
+                  className={clsx(
+                    "h-1.5 rounded-full transition-all duration-300",
+                    i === index ? "w-7 bg-accent" : "w-1.5 bg-white/30 hover:bg-white/60",
+                  )}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setHeld((value) => !value)}
+              aria-label={paused ? "Resume the featured reel" : "Pause the featured reel"}
+              aria-pressed={held}
+              className="grid h-7 w-7 place-items-center border border-line text-ink-secondary transition hover:border-accent hover:text-accent"
+            >
+              {paused ? <Play className="h-3 w-3 fill-current" /> : <Pause className="h-3 w-3 fill-current" />}
+            </button>
           </div>
         ) : null}
       </div>
