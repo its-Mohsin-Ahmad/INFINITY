@@ -218,7 +218,7 @@ export function Toaster() {
   const dismiss = usePlayer((s) => s.dismissToast);
   if (!toasts.length) return null;
   return (
-    <div className="pointer-events-none fixed bottom-6 right-4 z-[95] flex w-[300px] flex-col gap-2">
+    <div className="pointer-events-none fixed inset-x-4 right-4 z-[95] flex w-auto flex-col gap-2 dock-above-tabbar-offset sm:inset-x-auto sm:right-4 sm:w-[300px]">
       {toasts.map((t) => (
         <div
           key={t.id}

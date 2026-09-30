@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import {
+  Bell,
   ChevronDown,
   Download,
   Globe,
@@ -36,7 +37,8 @@ export function Logo({ className }: { className?: string }) {
           <path d="M4 12h4l2-5 4 10 2-5h4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-      <span className="font-display text-xl font-extrabold uppercase leading-none tracking-tight text-white">
+      {/* wordmark folds away below 360px so the row never overflows (§9) */}
+      <span className="hidden font-display text-xl font-extrabold uppercase leading-none tracking-tight text-white min-[360px]:inline">
         INFIN<span className="text-accent">I</span>TY
       </span>
     </Link>
@@ -225,7 +227,7 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
             type="button"
             onClick={onClose}
             aria-label="Close navigation"
-            className="grid h-9 w-9 place-items-center border border-line text-white"
+            className="grid h-11 w-11 place-items-center border border-line text-white sm:h-9 sm:w-9"
           >
             <X className="h-4 w-4" />
           </button>
@@ -471,6 +473,7 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const { count } = useCartTotals();
   const wishlist = usePlayer((s) => s.wishlist);
+  const user = usePlayer((s) => s.user);
 
   useEffect(() => setMounted(true), []);
 
@@ -487,15 +490,17 @@ export function Header() {
         "sticky top-0 z-[70] w-full border-b bg-bg-nav/95 backdrop-blur transition",
         scrolled ? "border-accent/30 shadow-panel" : "border-line",
       )}
+      // keeps the bar clear of the notch / Dynamic Island with viewport-fit=cover
+      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
       <UtilityBar mounted={mounted} />
 
-      <div className={clsx("shell flex items-center gap-4 transition-all", scrolled ? "h-14" : "h-16 lg:h-[70px]")}>
+      <div className={clsx("shell flex items-center gap-2 xs:gap-4 transition-all", scrolled ? "h-14" : "h-16 lg:h-[70px]")}>
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open navigation"
-          className="grid h-9 w-9 shrink-0 place-items-center border border-line text-white lg:hidden"
+          className="grid h-11 w-11 shrink-0 place-items-center border border-line text-white lg:hidden"
         >
           <Menu className="h-4 w-4" />
         </button>
@@ -503,30 +508,46 @@ export function Header() {
         <Logo className="shrink-0" />
         <DesktopNav items={PRIMARY_NAV} />
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1.5 xs:gap-2">
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            aria-label="Search games"
-            className="grid h-9 w-9 place-items-center border border-line text-white transition hover:border-accent hover:text-accent"
+            aria-label="Open search"
+            className="grid h-11 w-11 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:h-9 sm:w-9"
           >
             <Search className="h-4 w-4" />
           </button>
+          {/* wishlist + cart fold into the drawer below sm to protect the
+              icon priority order (hamburger → logo → search → bell → profile) */}
           <Link
             href="/dashboard/wishlist"
-            aria-label="Wishlist"
-            className="relative hidden h-9 w-9 place-items-center border border-line text-white transition hover:border-accent hover:text-accent lg:grid"
+            aria-label="Open wishlist"
+            className="relative hidden h-9 w-9 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:grid"
           >
             <Heart className="h-4 w-4" />
             {mounted ? <Counter value={wishlist.length} /> : null}
           </Link>
           <Link
             href="/cart"
-            aria-label="Cart"
-            className="relative grid h-9 w-9 place-items-center border border-line text-white transition hover:border-accent hover:text-accent"
+            aria-label="Open cart"
+            className="relative hidden h-9 w-9 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:grid"
           >
             <ShoppingCart className="h-4 w-4" />
             {mounted ? <Counter value={count} /> : null}
+          </Link>
+          <Link
+            href="/dashboard/notifications"
+            aria-label="Open notifications"
+            className="grid h-11 w-11 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:h-9 sm:w-9"
+          >
+            <Bell className="h-4 w-4" />
+          </Link>
+          <Link
+            href={user ? "/dashboard" : "/signin"}
+            aria-label={user ? "Open profile" : "Sign in"}
+            className="grid h-11 w-11 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:h-9 sm:w-9"
+          >
+            <UserRound className="h-4 w-4" />
           </Link>
           <Link
             href="/launcher"

@@ -270,12 +270,16 @@ than the next title on the list.
   falls back to the shared rule in the browser (see
   `src/lib/commerce/cart-line.ts`) and the newsletter opt-in is stored locally.
   Deploy the server build if you need genuine server-side validation.
-- **No authentication or payments.** Accounts, orders and checkout are modelled
-  in the types but not yet wired to a backend.
-- **Listing routes are next.** `/games`, `/deals`, `/new-releases`,
-  `/free-to-play`, `/coming-soon`, `/categories/*`, `/platforms/*`, `/studios/*`
-  and `/esports` are linked from the navigation; the query layer in
-  `src/lib/catalogue/query.ts` already powers them.
+- **No authentication or payments.** The sign-in flow writes a demo session to
+  local storage and nothing else; the cart's Checkout button is disabled because
+  no payment provider is wired up. See
+  [`src/data/support.ts`](src/data/support.ts) for the user-facing wording.
+- **Browse lanes are tabs, not routes.** `/games` carries the new / coming-soon /
+  top-rated / free-to-play lanes as `?tab=` deep links rather than as separate
+  pages, so every navigation entry resolves to a real prerendered file.
+  `scripts/check-links.mjs` audits the exported `out/` tree to keep it that way.
+- **Documented surfaces.** `/support` plus the `[slug]` documents cover terms,
+  privacy, cookies, accessibility, account, payments and launcher behaviour.
 - **Page weight.** Inline SVG key art makes the HTML larger than average; it
   compresses well, and the art variant per surface is deliberately capped.
 

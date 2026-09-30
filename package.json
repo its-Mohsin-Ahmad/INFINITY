@@ -10,6 +10,7 @@
     "deploy:pages": "node scripts/infinity-build.mjs --static && node scripts/deploy-pages.mjs",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "check:links": "node scripts/check-links.mjs",
     "verify": "node scripts/verify-database.mjs",
     "index:search": "node scripts/generate-search-index.mjs",
     "fetch:art": "node scripts/fetch-steam-art.mjs"

@@ -41,12 +41,16 @@ export function PlatformDiscovery() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
+      {/*
+        Phones scroll the lane horizontally (§25–27): ~1.6 cards per screen so
+        the next card peeks in and signals more; the grid reasserts from sm up.
+      */}
+      <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4 xl:grid-cols-8">
         {PLATFORMS.map((p) => (
           <Link
             key={p.slug}
             href={`/platforms/${p.slug}`}
-            className="group relative overflow-hidden border border-line bg-bg-card/50 p-4 transition hover:border-accent hover:bg-bg-card"
+            className="group relative w-[62%] shrink-0 snap-start overflow-hidden border border-line bg-bg-card/50 p-4 transition hover:border-accent hover:bg-bg-card active:scale-[0.98] sm:w-auto"
           >
             <span
               className="absolute inset-x-0 top-0 h-0.5 opacity-70 transition group-hover:opacity-100"

@@ -28,7 +28,7 @@ export function CompareTray() {
   if (!compare.length || pathname?.startsWith("/compare")) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[90] border-t border-line bg-bg-nav/95 backdrop-blur">
+    <div className="fixed inset-x-0 z-[90] border-t border-line bg-bg-nav/95 backdrop-blur dock-above-tabbar">
       <div className="shell flex flex-wrap items-center gap-3 py-3">
         <span className="flex items-center gap-2 font-display text-2xs font-bold uppercase tracking-[0.16em] text-white">
           <Scale className="h-4 w-4 text-accent" />

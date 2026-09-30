@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BootScreen, RouteProgressBar } from "@/components/layout/LoadingScreen";
 import { CompareTray } from "@/components/layout/CompareTray";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { Toaster } from "@/components/player/player-actions";
 
 /* ===========================================================================
@@ -64,6 +65,9 @@ export const viewport: Viewport = {
   themeColor: "#020B14",
   width: "device-width",
   initialScale: 1,
+  // Lets the notch/home-indicator insets flow into env(safe-area-inset-*)
+  // so the header and the bottom tab bar never sit under system chrome.
+  viewportFit: "cover",
   colorScheme: "dark",
 };
 
@@ -91,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Footer />
         <Toaster />
         <CompareTray />
+        <BottomNav />
       </body>
     </html>
   );

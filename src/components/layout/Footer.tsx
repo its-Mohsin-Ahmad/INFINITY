@@ -98,7 +98,7 @@ export function Footer() {
                 rel="noopener noreferrer"
                 aria-label={s.label}
                 title={s.label}
-                className="grid h-9 w-9 place-items-center border border-line text-ink-secondary transition hover:border-accent hover:bg-accent hover:text-white"
+                className="grid h-11 w-11 place-items-center border border-line text-ink-secondary transition hover:border-accent hover:bg-accent hover:text-white sm:h-9 sm:w-9"
               >
                 <SocialIcon icon={s.icon} />
               </a>

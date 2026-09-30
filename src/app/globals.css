@@ -19,6 +19,8 @@
   --line: #1d2935;
   --nav-h: 64px;
   --utility-h: 30px;
+  /* Height of the mobile bottom tab bar (§83) — content docks reserve it. */
+  --bottomnav-h: 64px;
   /* Loaded from Google Fonts in app/layout.tsx with resilient system fallbacks
      so the UI never blocks on (or breaks without) the network. */
   --font-display: "Chakra Petch", "Rajdhani", "Oswald", system-ui, "Segoe UI", sans-serif;
@@ -46,6 +48,36 @@ body {
 /* Prevent layout shift from the sticky shell while a drawer is open */
 body[data-scroll-locked="true"] {
   overflow: hidden;
+}
+
+/* ==========================================================================
+   Mobile shell (§83–86) — the fixed tab bar must never cover content.
+   Reserves its height below lg; on desktop the bar is gone entirely.
+   ========================================================================== */
+@media (max-width: 1023px) {
+  body {
+    padding-bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Fixed docks (compare tray, toasts) lift above the tab bar on mobile and
+   drop back to their resting spot at lg where the bar is hidden. */
+.dock-above-tabbar {
+  bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px));
+}
+
+.dock-above-tabbar-offset {
+  bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px) + 12px);
+}
+
+@media (min-width: 1024px) {
+  .dock-above-tabbar {
+    bottom: 0;
+  }
+
+  .dock-above-tabbar-offset {
+    bottom: 1.5rem;
+  }
 }
 
 ::selection {

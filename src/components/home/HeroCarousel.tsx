@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play, Star } from "lucide-react";
 import type { Game } from "@/lib/types";
@@ -34,6 +34,8 @@ export function HeroCarousel({ games }: { games: Game[] }) {
   const [hovering, setHovering] = useState(false);
   const [held, setHeld] = useState(false);
   const paused = hovering || held;
+  /** Horizontal swipe origin — phones page the reel by dragging, not by arrows. */
+  const touchX = useRef<number | null>(null);
 
   useEffect(() => {
     if (paused || games.length < 2) return;
@@ -79,14 +81,27 @@ export function HeroCarousel({ games }: { games: Game[] }) {
 
   return (
     <section
-      className="hero-carousel relative isolate overflow-hidden border-b border-line bg-bg-deep"
+      className="hero-carousel relative isolate touch-pan-y overflow-hidden border-b border-line bg-bg-deep"
+      aria-label="Featured games"
+      /* touch-pan-y keeps vertical page scrolling alive over the hero while
+         horizontal drags are claimed for slide-to-change navigation */
       data-paused={paused}
       aria-roledescription="carousel"
-      aria-label="Featured games"
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
       onFocusCapture={() => setHovering(true)}
       onBlurCapture={() => setHovering(false)}
+      onTouchStart={(event) => {
+        touchX.current = event.touches[0]?.clientX ?? null;
+      }}
+      onTouchEnd={(event) => {
+        const start = touchX.current;
+        touchX.current = null;
+        if (start == null || games.length < 2) return;
+        const dx = (event.changedTouches[0]?.clientX ?? start) - start;
+        if (Math.abs(dx) < 44) return; // ignore taps and micro-jitters
+        step(dx < 0 ? 1 : -1);
+      }}
     >
       {/*
         Every slide stays mounted and is cross-faded with opacity. Mounting only
@@ -158,7 +173,9 @@ export function HeroCarousel({ games }: { games: Game[] }) {
         </>
       ) : null}
 
-      <div className="shell relative flex min-h-[540px] flex-col justify-end pb-14 pt-24 sm:min-h-[600px] lg:min-h-[680px] lg:pb-16 lg:pt-28">
+      {/* 440px keeps the first screen below the header cinematic but phone-sized
+          (§15: hero ~400–500px); it grows to the desktop stage from sm up. */}
+      <div className="shell relative flex min-h-[440px] flex-col justify-end pb-14 pt-24 xs:min-h-[500px] sm:min-h-[600px] lg:min-h-[680px] lg:pb-16 lg:pt-28">
         <div key={`${game.slug}-copy`} className="max-w-3xl animate-fade-up">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-2 border border-accent/60 bg-accent/15 px-2.5 py-1 font-display text-2xs font-bold uppercase tracking-[0.18em] text-white">
@@ -180,7 +197,7 @@ export function HeroCarousel({ games }: { games: Game[] }) {
             <p className="mt-3.5 font-display text-sm uppercase tracking-[0.18em] text-accent">{game.tagline}</p>
           ) : null}
 
-          <p className="mt-3.5 max-w-2xl text-sm leading-relaxed text-ink-secondary sm:text-base">
+          <p className="mt-3.5 line-clamp-3 max-w-2xl text-sm leading-relaxed text-ink-secondary sm:line-clamp-none sm:text-base">
             {game.shortDescription}
           </p>
 

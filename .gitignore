@@ -24,3 +24,8 @@ spy-index.json
 # Generated appid index for scripts/fetch-steam-art.mjs. ~2.5 MB of SteamSpy
 # owner-ranked data; rebuild it with the index step rather than committing it.
 scripts/.steam-app-index.json
+
+# The Pages workflow is intentionally not tracked: deployment runs through
+# `node scripts/deploy-pages.mjs`, which pushes the exported `out/` to gh-pages.
+# Keeping the workflow out of the repo avoids a second, competing deploy path.
+.github/

@@ -33,10 +33,10 @@ export const PRIMARY_NAV: NavItem[] = [
         title: "Browse",
         children: [
           { label: "All games", href: "/games", hint: "The full catalogue" },
-          { label: "New releases", href: "/new-releases" },
-          { label: "Coming soon", href: "/coming-soon" },
-          { label: "Top rated", href: "/top-rated" },
-          { label: "Free to play", href: "/free-to-play" },
+          { label: "New releases", href: "/games?tab=new" },
+          { label: "Coming soon", href: "/games?tab=soon" },
+          { label: "Top rated", href: "/games?tab=top-rated" },
+          { label: "Free to play", href: "/games?tab=free" },
           { label: "Deals", href: "/deals" },
         ],
       },
@@ -69,29 +69,19 @@ export const PRIMARY_NAV: NavItem[] = [
   { label: "Store", href: "/store" },
   { label: "Game Pass", href: "/game-pass", highlight: true },
   { label: "News", href: "/news" },
-  { label: "Reviews", href: "/reviews" },
+  { label: "Reviews", href: "/news?category=culture" },
   { label: "Esports", href: "/esports" },
   { label: "Community", href: "/community" },
   {
     label: "More",
-    href: "/about",
+    href: "/support",
     sections: [
       {
         title: "Ecosystem",
         children: [
           { label: "Launcher", href: "/launcher" },
-          { label: "Downloads", href: "/downloads" },
           { label: "Studios", href: "/studios" },
           { label: "Compare games", href: "/compare" },
-        ],
-      },
-      {
-        title: "Company",
-        children: [
-          { label: "About INFINITY", href: "/about" },
-          { label: "Careers", href: "/careers" },
-          { label: "Contact", href: "/contact" },
-          { label: "Support centre", href: "/support" },
         ],
       },
       {
@@ -99,8 +89,16 @@ export const PRIMARY_NAV: NavItem[] = [
         children: [
           { label: "Dashboard", href: "/dashboard" },
           { label: "Wishlist", href: "/dashboard/wishlist" },
-          { label: "Library", href: "/dashboard/library" },
           { label: "Notifications", href: "/dashboard/notifications" },
+        ],
+      },
+      {
+        title: "Support",
+        children: [
+          { label: "Help centre", href: "/support" },
+          { label: "Accessibility", href: "/support/accessibility" },
+          { label: "Privacy", href: "/support/privacy" },
+          { label: "Terms of use", href: "/support/terms" },
         ],
       },
     ],
@@ -109,9 +107,9 @@ export const PRIMARY_NAV: NavItem[] = [
 
 export const UTILITY_LINKS: NavChild[] = [
   { label: "Support", href: "/support" },
-  { label: "Careers", href: "/careers" },
-  { label: "Press", href: "/contact" },
-  { label: "Status", href: "/support/launcher-troubleshooting" },
+  { label: "Account & security", href: "/support/account-and-security" },
+  { label: "Payments & refunds", href: "/support/payments-and-refunds" },
+  { label: "Launcher", href: "/launcher" },
 ];
 
 export const FOOTER_COLUMNS: { title: string; links: NavChild[] }[] = [
@@ -121,10 +119,10 @@ export const FOOTER_COLUMNS: { title: string; links: NavChild[] }[] = [
       { label: "All games", href: "/games" },
       { label: "Categories", href: "/categories" },
       { label: "Platforms", href: "/platforms" },
-      { label: "New releases", href: "/new-releases" },
-      { label: "Coming soon", href: "/coming-soon" },
-      { label: "Top rated", href: "/top-rated" },
-      { label: "Free to play", href: "/free-to-play" },
+      { label: "New releases", href: "/games?tab=new" },
+      { label: "Coming soon", href: "/games?tab=soon" },
+      { label: "Top rated", href: "/games?tab=top-rated" },
+      { label: "Free to play", href: "/games?tab=free" },
       { label: "Compare games", href: "/compare" },
     ],
   },
@@ -136,18 +134,18 @@ export const FOOTER_COLUMNS: { title: string; links: NavChild[] }[] = [
       { label: "Game Pass", href: "/game-pass" },
       { label: "Bundles & DLC", href: "/store?kind=bundle" },
       { label: "Cart", href: "/cart" },
-      { label: "Checkout", href: "/checkout" },
+      { label: "Wishlist", href: "/dashboard/wishlist" },
     ],
   },
   {
     title: "Ecosystem",
     links: [
       { label: "Launcher", href: "/launcher" },
-      { label: "Downloads", href: "/downloads" },
       { label: "Esports hub", href: "/esports" },
       { label: "Community", href: "/community" },
       { label: "Studios", href: "/studios" },
       { label: "Newsroom", href: "/news" },
+      { label: "Dashboard", href: "/dashboard" },
     ],
   },
   {
@@ -157,19 +155,19 @@ export const FOOTER_COLUMNS: { title: string; links: NavChild[] }[] = [
       { label: "Account & security", href: "/support/account-and-security" },
       { label: "Payments & refunds", href: "/support/payments-and-refunds" },
       { label: "Launcher troubleshooting", href: "/support/launcher-troubleshooting" },
-      { label: "Contact us", href: "/contact" },
       { label: "Accessibility", href: "/support/accessibility" },
+      { label: "Cookies", href: "/support/cookies" },
     ],
   },
   {
-    title: "Company",
+    title: "Legal",
     links: [
-      { label: "About", href: "/about" },
-      { label: "Careers", href: "/careers" },
-      { label: "Partners", href: "/contact" },
-      { label: "Media & press", href: "/contact" },
+      { label: "About this build", href: "/support" },
+      { label: "Help centre", href: "/support" },
+      { label: "Notifications", href: "/dashboard/notifications" },
       { label: "Privacy", href: "/support/privacy" },
       { label: "Terms of use", href: "/support/terms" },
+      { label: "Accessibility", href: "/support/accessibility" },
     ],
   },
 ];

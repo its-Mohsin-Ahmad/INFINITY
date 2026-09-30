@@ -36,7 +36,7 @@ export function StatsBar() {
 
   return (
     <section aria-label="Catalogue scale" className="border border-line bg-line">
-      <div className="grid grid-cols-2 gap-px sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-px sm:grid-cols-4 lg:grid-cols-6">
         {cells.map((cell) => (
           <div key={cell.label} className="flex items-center gap-3 bg-bg-nav px-4 py-4 lg:px-5">
             <cell.icon className="h-5 w-5 shrink-0 text-accent" aria-hidden="true" />
