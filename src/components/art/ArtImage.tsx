@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import clsx from "clsx";
 import type { Game } from "@/lib/types";
 import { GameArt, type ArtVariant } from "./GameArt";
@@ -50,6 +50,11 @@ export interface ArtImageProps {
   showTitle?: boolean;
   /** Passed to the generated fallback only. */
   hue?: number;
+  /**
+   * Inline style, used mainly for `objectPosition` so a card can set a
+   * per-game focal point without baking the value into a class name.
+   */
+  style?: CSSProperties;
 }
 
 export function ArtImage({
@@ -61,6 +66,7 @@ export function ArtImage({
   alt,
   showTitle,
   hue,
+  style,
 }: ArtImageProps) {
   const [failed, setFailed] = useState(false);
   const src = artSourceFor(game, variant);
@@ -86,6 +92,7 @@ export function ArtImage({
       loading={eager ? "eager" : "lazy"}
       decoding={eager ? "sync" : "async"}
       onError={() => setFailed(true)}
+      style={style}
       className={clsx("bg-bg-deep object-cover", className)}
     />
   );

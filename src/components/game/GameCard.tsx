@@ -3,100 +3,390 @@ import clsx from "clsx";
 import type { Game } from "@/lib/types";
 import { ArtImage } from "@/components/art/ArtImage";
 import { Badge, PlatformPills, PriceTag, ScoreBadge } from "@/components/ui/primitives";
-import { WishlistButton } from "@/components/player/player-actions";
+import { AddToCartButton, WishlistButton } from "@/components/player/player-actions";
 import { genreName } from "@/data/taxonomy";
 import { compactNumber } from "@/lib/generate";
+import {
+  CARD_ASPECT_CLASS,
+  CARD_VARIANTS,
+  badgesFor,
+  focalPointFor,
+  focalStyle,
+  type CardVariant,
+  type CardVariantSpec,
+  type FocalPoint,
+} from "./card-tokens";
 
 /* ===========================================================================
  * Game cards
  * ---------------------------------------------------------------------------
- * Three presentations of the same record. Art comes from the storefront when
- * the catalogue resolved it, and from the key-art engine otherwise.
+ * One component, ten compositions. Every variant is described by a row in
+ * card-tokens.ts, so a new card size is a token, not a new file.
+ *
+ * Interaction rules that hold for all of them:
+ *
+ *   . A single stretched link owns the whole card. Its accessible name is the
+ *     title, so assistive tech never meets duplicate links.
+ *   . Wishlist and cart render as real buttons *above* that link (z-30), never
+ *     nested inside it, so they stay independently focusable and clickable.
+ *   . Hover never changes geometry. No translate, no border-width change, no
+ *     height change - only the accent hairline and an art zoom inside an
+ *     already-clipped frame. The corner wishlist is the one exception, and it
+ *     is opacity-only.
  * ======================================================================== */
 
-export function GameCard({
-  game,
-  className,
-  showWishlist = true,
-  eager = false,
-}: {
+export interface GameCardProps {
   game: Game;
+  /** Composition + sizing token. Defaults to the classic browse poster. */
+  variant?: CardVariant;
   className?: string;
-  showWishlist?: boolean;
+  /** Set false to drop every interactive affordance (static/editorial use). */
+  showActions?: boolean;
+  /** Override the deterministic focal point for a one-off placement. */
+  focalPoint?: FocalPoint;
   eager?: boolean;
-}) {
-  const primaryGenre = game.genre[0];
+  /** Secondary seed so two generated fallbacks of the same title differ. */
+  index?: number;
+}
 
+const clamp: Record<CardVariantSpec["descriptionLines"], string> = {
+  1: "line-clamp-1",
+  2: "line-clamp-2",
+  3: "line-clamp-3",
+};
+
+/** The secondary line under a title, or null when the variant has no meta. */
+function metaLine(game: Game, spec: CardVariantSpec): string | null {
+  if (spec.metaDetail === "none") return null;
+  const primary = genreName(game.genre[0]);
+  if (spec.metaDetail === "full") {
+    return `${primary} · ${game.developer} · ${game.releaseDate.slice(0, 4)}`;
+  }
+  return `${primary} · ${game.developer}`;
+}
+
+
+/** Status badges, top-left of the art, trimmed to the variant's budget. */
+function CardBadges({ game, spec }: { game: Game; spec: CardVariantSpec }) {
+  const badges = spec.showBadges ? badgesFor(game, spec.maxBadges) : [];
+  if (!badges.length) return null;
   return (
-    <article
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col items-start gap-1 p-2.5">
+      {badges.map((b) => (
+        <Badge key={b.key} tone={b.tone}>
+          {b.label}
+        </Badge>
+      ))}
+    </div>
+  );
+}
+
+/** INFINITY score, top-right. */
+function CardScore({ game }: { game: Game }) {
+  return (
+    <div className="pointer-events-none absolute right-2.5 top-2.5 z-20">
+      <ScoreBadge rating={game.rating} />
+    </div>
+  );
+}
+
+/**
+ * Corner wishlist for the poster variants. Fades in on hover and on keyboard
+ * focus, but is always in the DOM, so tabbing to it never reflows the grid.
+ */
+function CardCornerWishlist({ game, reveal }: { game: Game; reveal: boolean }) {
+  return (
+    <div
       className={clsx(
-        "group relative flex flex-col overflow-hidden border border-line bg-bg-card/60 transition-all duration-300",
-        "hover:-translate-y-1 hover:border-accent/60 hover:shadow-glow focus-within:-translate-y-1",
-        className,
+        "absolute bottom-2.5 right-2.5 z-30 transition-opacity duration-300 ease-premium",
+        reveal
+          ? "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+          : "opacity-100",
       )}
     >
-      {/* accent hairline that lights up on hover */}
-      <span className="pointer-events-none absolute inset-x-0 top-0 z-30 h-0.5 scale-x-0 bg-gradient-to-r from-accent via-accent-bright to-transparent transition-transform duration-500 group-hover:scale-x-100" />
+      <WishlistButton game={game} />
+    </div>
+  );
+}
 
-      <Link href={`/games/${game.slug}`} className="relative block aspect-[2/3] overflow-hidden" aria-label={game.title}>
+/** Art frame: art, scrim, badges, score, optional overlay title. */
+function CardArt({
+  game,
+  spec,
+  focal,
+  eager,
+  index,
+  fill = false,
+  showActions,
+}: {
+  game: Game;
+  spec: CardVariantSpec;
+  focal: FocalPoint;
+  eager: boolean;
+  index: number;
+  /** Row layout: the art fills its column height instead of using its aspect. */
+  fill?: boolean;
+  showActions: boolean;
+}) {
+  const meta = metaLine(game, spec);
+  return (
+    <div className={clsx("relative", fill && "h-full")}>
+      <div
+        className={clsx(
+          "relative overflow-hidden bg-bg-deep",
+          spec.stretch
+            ? clsx("flex-1", spec.minHeight)
+            : fill
+              ? "h-full min-h-[7.5rem]"
+              : CARD_ASPECT_CLASS[spec.aspect],
+        )}
+      >
         <ArtImage
           game={game}
-          variant="poster"
+          variant={spec.art}
+          index={index}
           showTitle={false}
           eager={eager}
-          className="h-full w-full transition-transform duration-500 group-hover:scale-[1.07]"
+          alt=""
+          style={focalStyle(focal)}
+          className="h-full w-full object-cover transition-transform duration-500 ease-out will-change-transform group-hover:scale-[1.06]"
         />
+      </div>
 
-        {/* legibility scrim: real box art can be bright or busy. Kept light at
-            the top so the artwork reads, heavier under the title block. */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/20 to-bg-deep/25" />
+      {/* legibility scrim - real box art can be bright or very busy */}
+      <span aria-hidden="true" className={clsx("pointer-events-none absolute inset-0", spec.scrim)} />
 
-        {/* specular sweep */}
-        <span className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-2/3 group-hover:opacity-100" />
+      {/* specular sweep, fully inside the clipped frame */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-2/3 group-hover:opacity-100"
+      />
 
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-2.5">
-          <div className="flex flex-col items-start gap-1">
-            {game.isComingSoon ? <Badge tone="soon">Coming soon</Badge> : null}
-            {game.isNew && !game.isComingSoon ? <Badge tone="new">New</Badge> : null}
-            {game.isTrending ? <Badge tone="live">Trending</Badge> : null}
-            {game.isFree ? <Badge tone="accent">Free to play</Badge> : null}
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <ScoreBadge rating={game.rating} />
-            {game.discount > 0 ? <Badge tone="live">-{game.discount}%</Badge> : null}
-          </div>
-        </div>
+      <CardBadges game={game} spec={spec} />
+      {spec.showScore ? <CardScore game={game} /> : null}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col p-3">
-          <h3 className="font-display text-[15px] font-extrabold uppercase leading-tight tracking-tight text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] transition-colors duration-300 group-hover:text-accent">
+      {spec.overlayTitle ? (
+        <div
+          className={clsx(
+            "pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col p-3",
+            showActions && spec.wishlist === "corner" && "pr-14",
+          )}
+        >
+          <h3
+            className={clsx(
+              "font-display text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] transition-colors duration-300 group-hover:text-accent",
+              spec.title,
+            )}
+          >
             {game.title}
           </h3>
-          <p className="mt-1 line-clamp-1 text-2xs uppercase tracking-[0.12em] text-ink-secondary">
-            {genreName(primaryGenre)} · {game.developer}
-          </p>
-        </div>
-      </Link>
-
-      {showWishlist ? (
-        <div className="absolute bottom-[86px] right-2.5 z-20 translate-x-1 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100 focus-within:translate-x-0 focus-within:opacity-100">
-          <WishlistButton game={game} />
+          {meta ? <p className={clsx("mt-1", spec.meta)}>{meta}</p> : null}
         </div>
       ) : null}
 
-      <div className="flex flex-1 flex-col justify-between gap-2.5 border-t border-line px-3 py-2.5 transition-colors duration-300 group-hover:bg-bg-card/50">
-        <div className="flex items-center justify-between gap-2">
-          <PriceTag price={game.price} discount={game.discount} isFree={game.isFree} isComingSoon={game.isComingSoon} />
-          <span className="text-2xs uppercase tracking-wider text-ink-muted">
-            {compactNumber(game.wishlistCount)} wishlisted
-          </span>
+      {showActions && spec.wishlist === "corner" ? (
+        <CardCornerWishlist game={game} reveal={spec.wishlistReveal} />
+      ) : null}
+    </div>
+  );
+}
+
+
+/** Title block and blurb. The title is skipped when it is burned into the art. */
+function CardBody({ game, spec, meta }: { game: Game; spec: CardVariantSpec; meta: string | null }) {
+  return (
+    <>
+      {!spec.overlayTitle ? (
+        <div>
+          <h3
+            className={clsx(
+              "font-display text-white transition-colors duration-300 group-hover:text-accent",
+              spec.title,
+            )}
+          >
+            {game.title}
+          </h3>
+          {meta ? <p className={clsx("mt-1", spec.meta)}>{meta}</p> : null}
         </div>
-        <PlatformPills platforms={game.platforms} max={5} />
-      </div>
+      ) : null}
+
+      {spec.showDescription ? (
+        <p className={clsx("text-xs leading-relaxed text-ink-secondary", clamp[spec.descriptionLines])}>
+          {game.shortDescription}
+        </p>
+      ) : null}
+
+      {spec.showFeatures ? (
+        <ul className="flex flex-wrap gap-1">
+          {game.features.slice(0, 3).map((f) => (
+            <li
+              key={f}
+              className="border border-line bg-bg-deep/50 px-1.5 py-[2px] font-display text-[10px] font-bold uppercase tracking-wider text-ink-muted"
+            >
+              {f}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </>
+  );
+}
+
+/** Price, wishlist count and platform pills. */
+function CardMetaRow({ game, spec }: { game: Game; spec: CardVariantSpec }) {
+  return (
+    <>
+      {spec.showPrice ? (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <PriceTag
+            price={game.price}
+            discount={game.discount}
+            isFree={game.isFree}
+            isComingSoon={game.isComingSoon}
+            size={spec.priceSize}
+          />
+          {spec.showWishlistCount ? (
+            <span className="text-2xs uppercase tracking-wider text-ink-muted">
+              {compactNumber(game.wishlistCount)} wishlisted
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+      {spec.showPlatforms ? <PlatformPills platforms={game.platforms} max={spec.platformMax} /> : null}
+    </>
+  );
+}
+
+/**
+ * The action cluster, rendered at z-30 above the stretched card link so these
+ * stay real, independently tabbable controls rather than decoration trapped
+ * inside a link. There is deliberately no "view" affordance here: the card
+ * surface already navigates.
+ */
+function CardActions({
+  game,
+  spec,
+  showActions,
+}: {
+  game: Game;
+  spec: CardVariantSpec;
+  showActions: boolean;
+}) {
+  if (!showActions) return null;
+  const wantsWishlist = spec.wishlist === "action";
+  const wantsCart = spec.showCart;
+  if (!wantsWishlist && !wantsCart) return null;
+  return (
+    <div className="relative z-30 flex flex-col gap-2">
+      {wantsCart ? <AddToCartButton game={game} className="w-full" /> : null}
+      {wantsWishlist ? <WishlistButton game={game} variant="wide" className="w-full" /> : null}
+    </div>
+  );
+}
+
+
+/* ===========================================================================
+ * GameCard — the spec-driven composition
+ * --------------------------------------------------------------------------- */
+
+/**
+ * The stretched link. It owns the whole card surface, so clicks on art, title,
+ * meta and whitespace all navigate, while wishlist / cart buttons stay real
+ * controls above it (z-30) rather than decoration trapped inside a link.
+ */
+function CardLink({ game }: { game: Game }) {
+  return (
+    <Link href={`/games/${game.slug}`} aria-label={game.title} className="absolute inset-0 z-10 focus-visible:outline-none" />
+  );
+}
+
+/** Accent hairline across the top edge. Scale only — hovering never reflows. */
+function CardHairline() {
+  return (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-0 top-0 z-30 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-accent via-accent-bright to-transparent transition-transform duration-500 ease-out group-hover:scale-x-100"
+    />
+  );
+}
+
+export function GameCard({
+  game,
+  variant = "standard",
+  className,
+  showActions = true,
+  focalPoint,
+  eager = false,
+  index = 0,
+}: GameCardProps) {
+  const spec = CARD_VARIANTS[variant];
+  const focal = focalPoint ?? focalPointFor(game, variant);
+  const meta = metaLine(game, spec);
+
+  /** Controls that render in the body and must sit above the stretched link. */
+  const hasBodyActions = showActions && (spec.wishlist === "action" || spec.showCart);
+  /** The body exists when there is copy to show, or controls that live in it. */
+  const body = spec.showTextBody || hasBodyActions;
+
+  const shell = clsx(
+    "group relative flex overflow-hidden border border-line bg-bg-card/60 transition-colors duration-300 hover:border-accent/60 focus-within:border-accent/60 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent-bright",
+    spec.stretch && "h-full",
+    className,
+  );
+
+  /* --- row layout: art beside the copy ---------------------------------- */
+  if (spec.layout === "row") {
+    return (
+      <article className={clsx(shell, "items-stretch")}>
+        <div className="relative w-[42%] shrink-0 overflow-hidden border-r border-line bg-bg-deep">
+          <CardArt
+            game={game}
+            spec={spec}
+            focal={focal}
+            eager={eager}
+            index={index}
+            fill
+            showActions={showActions}
+          />
+        </div>
+
+        {body ? (
+          <div className={clsx("flex min-w-0 flex-1 flex-col gap-2.5", spec.bodyPadding)}>
+            <CardBody game={game} spec={spec} meta={meta} />
+            <CardMetaRow game={game} spec={spec} />
+            {hasBodyActions ? (
+              <div className="mt-auto pt-1">
+                <CardActions game={game} spec={spec} showActions={showActions} />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        <CardLink game={game} />
+        <CardHairline />
+      </article>
+    );
+  }
+
+  /* --- stacked layouts: tile / poster / panel / band / promo ------------ */
+  return (
+    <article className={clsx(shell, "flex-col")}>
+      <CardArt game={game} spec={spec} focal={focal} eager={eager} index={index} showActions={showActions} />
+
+      {body ? (
+        <div className={clsx("relative flex flex-col gap-2.5", spec.bodyPadding)}>
+          <CardBody game={game} spec={spec} meta={meta} />
+          <CardMetaRow game={game} spec={spec} />
+          {hasBodyActions ? <CardActions game={game} spec={spec} showActions={showActions} /> : null}
+        </div>
+      ) : null}
+
+      <CardLink game={game} />
+      <CardHairline />
     </article>
   );
 }
 
-/** Horizontal list row used on browse, search and admin tables. */
 export function GameListRow({ game, index }: { game: Game; index?: number }) {
   return (
     <Link
@@ -155,4 +445,3 @@ export function GameMiniTile({ game }: { game: Game }) {
     </Link>
   );
 }
-

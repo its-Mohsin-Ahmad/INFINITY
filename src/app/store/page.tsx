@@ -222,7 +222,7 @@ export default function StorePage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {storePicks.map((g) => (
             <div key={g.slug} className="flex h-full flex-col gap-2">
-              <GameCard game={g} className="h-full" showWishlist={false} />
+              <GameCard game={g} className="h-full" showActions={false} />
               <AddToCartButton game={g} />
             </div>
           ))}
