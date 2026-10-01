@@ -86,6 +86,32 @@ canvas {
   max-width: 100%;
 }
 
+/* Long words, titles and URLs must wrap inside their column instead of
+   widening it — an unbreakable token is the usual cause of a page that scrolls
+   horizontally on Android. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+li,
+dd,
+dt,
+figcaption,
+blockquote,
+label {
+  overflow-wrap: break-word;
+}
+
+/* Grid items default to `min-width: auto`, so one wide child can stretch its
+   track past the viewport. Letting tracks shrink keeps every grid inside the
+   phone width. */
+.grid > * {
+  min-width: 0;
+}
+
 /* Prevent layout shift from the sticky shell while a drawer is open */
 body[data-scroll-locked="true"] {
   overflow: hidden;

@@ -119,14 +119,15 @@ export function BrowseTabs({
 
   return (
     <div className={className}>
-      {/* -mx-4 lets the strip run to the screen edge on phones so the next tab
-          is visibly peekable, matching the card rails. */}
+      {/* No negative margin here on purpose: this component is used both inside and
+          outside `.shell`, and a full-bleed `-mx-4` inside an unpadded parent
+          pushed 16px past the viewport on phones and scrolled the whole page. */}
       <div
         ref={listRef}
         role="tablist"
         aria-label="Browse sections"
         onKeyDown={onKeyDown}
-        className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0"
+        className="no-scrollbar flex w-full min-w-0 snap-x snap-mandatory gap-1 overflow-x-auto"
       >
         {tabs.map((tab, i) => (
           <button
