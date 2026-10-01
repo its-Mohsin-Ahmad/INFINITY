@@ -51,8 +51,8 @@ function StatBand() {
     <div className="border-b border-line bg-bg-nav/60">
       <div className="shell grid grid-cols-2 gap-4 py-6 md:grid-cols-3 lg:grid-cols-6">
         {cells.map((s) => (
-          <div key={s.label}>
-            <p className="font-display text-2xl font-extrabold tabular-nums text-white">{s.value}</p>
+          <div key={s.label} className="min-w-0">
+            <p className="font-display text-xl font-extrabold tabular-nums text-white sm:text-2xl">{s.value}</p>
             <p className="text-2xs uppercase tracking-[0.16em] text-ink-muted">{s.label}</p>
           </div>
         ))}
@@ -106,16 +106,16 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-8 sm:grid-cols-3 lg:grid-cols-5">
           {FOOTER_COLUMNS.map((col) => (
-            <nav key={col.title} aria-label={col.title}>
+            <nav key={col.title} aria-label={col.title} className="min-w-0">
               <p className="mb-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white">
                 {col.title}
               </p>
               <ul className="space-y-2">
                 {col.links.map((l) => (
                   <li key={`${col.title}:${l.label}`}>
-                    <Link href={l.href} className="text-xs text-ink-secondary transition hover:text-accent">
+                    <Link href={l.href} className="block break-words text-xs text-ink-secondary transition hover:text-accent">
                       {l.label}
                     </Link>
                   </li>

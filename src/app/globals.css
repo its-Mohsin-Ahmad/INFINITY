@@ -64,6 +64,9 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* `clip` (not `hidden`) contains stray wide children without creating a
+     scroll container, so `position: sticky` keeps working on the header. */
+  overflow-x: clip;
 }
 
 body {
@@ -72,7 +75,15 @@ body {
   font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+/* Nothing may push the page sideways on a phone. */
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 /* Prevent layout shift from the sticky shell while a drawer is open */

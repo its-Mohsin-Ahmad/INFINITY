@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -37,8 +37,8 @@ export function Logo({ className }: { className?: string }) {
           <path d="M4 12h4l2-5 4 10 2-5h4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-      {/* wordmark folds away below 360px so the row never overflows (§9) */}
-      <span className="hidden font-display text-xl font-extrabold uppercase leading-none tracking-tight text-white min-[360px]:inline">
+      {/* wordmark folds away below 400px so the row can never overflow (§9) */}
+      <span className="hidden font-display text-xl font-extrabold uppercase leading-none tracking-tight text-white min-[400px]:inline">
         INFIN<span className="text-accent">I</span>TY
       </span>
     </Link>
@@ -76,7 +76,7 @@ function SearchField({ className }: { className?: string }) {
         type="search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search 540+ games, studios, genres…"
+        placeholder="Search 540+ games, studios, genresâ€¦"
         aria-label="Search games"
         className="h-10 w-full border border-line bg-bg-deep/80 pl-9 pr-3 text-sm text-white outline-none transition placeholder:text-ink-muted focus:border-accent"
       />
@@ -110,7 +110,7 @@ function UtilityBar({ mounted }: { mounted: boolean }) {
           <span className="text-line">|</span>
           <button type="button" className="flex items-center gap-1.5 text-ink-secondary transition hover:text-accent">
             <Globe className="h-3 w-3" />
-            English · USD
+            English Â· USD
           </button>
           <span className="text-line">|</span>
           <Link
@@ -227,7 +227,7 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
             type="button"
             onClick={onClose}
             aria-label="Close navigation"
-            className="grid h-11 w-11 place-items-center border border-line text-white sm:h-9 sm:w-9"
+            className="grid h-10 w-10 shrink-0 place-items-center border border-line text-white sm:h-9 sm:w-9"
           >
             <X className="h-4 w-4" />
           </button>
@@ -329,7 +329,7 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
 }
 
 /**
- * Global search overlay (§8) — opens over the page, matches against the same
+ * Global search overlay (Â§8) â€” opens over the page, matches against the same
  * trimmed index the /search route uses, and never leaves the homepage.
  */
 function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -338,7 +338,7 @@ function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<SearchHit[] | null>(null);
 
-  /** Fetch the index once, on first open — the homepage never pays for it. */
+  /** Fetch the index once, on first open â€” the homepage never pays for it. */
   useEffect(() => {
     if (!open || hits !== null) return;
     let alive = true;
@@ -403,7 +403,7 @@ function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }
                   go(`/search?q=${encodeURIComponent(q.trim())}`);
                 }
               }}
-              placeholder="Search 450+ games, genres, developers…"
+              placeholder="Search 450+ games, genres, developersâ€¦"
               aria-label="Search games"
               className="h-10 min-w-0 flex-1 bg-transparent font-display text-lg text-white outline-none placeholder:text-ink-muted sm:text-2xl"
             />
@@ -429,7 +429,7 @@ function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-semibold text-white">{hit.title}</span>
                       <span className="block truncate text-2xs text-ink-muted">
-                        {genreName(hit.genre[0])} · {hit.developer}
+                        {genreName(hit.genre[0])} Â· {hit.developer}
                       </span>
                     </span>
                     <span className="font-display text-2xs tabular-nums text-accent">{hit.rating.toFixed(1)}</span>
@@ -457,7 +457,7 @@ function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }
 
           {q.trim().length >= 2 && suggestions.length === 0 && hits ? (
             <p className="mt-4 text-sm text-ink-secondary">
-              No matches for “{q.trim()}” — press Enter to open full results.
+              No matches for â€œ{q.trim()}â€ â€” press Enter to open full results.
             </p>
           ) : null}
         </div>
@@ -500,7 +500,7 @@ export function Header() {
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open navigation"
-          className="grid h-11 w-11 shrink-0 place-items-center border border-line text-white lg:hidden"
+          className="grid h-10 w-10 shrink-0 place-items-center border border-line text-white lg:hidden"
         >
           <Menu className="h-4 w-4" />
         </button>
@@ -513,12 +513,12 @@ export function Header() {
             type="button"
             onClick={() => setSearchOpen(true)}
             aria-label="Open search"
-            className="grid h-11 w-11 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:h-9 sm:w-9"
+            className="grid h-10 w-10 shrink-0 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:h-9 sm:w-9"
           >
             <Search className="h-4 w-4" />
           </button>
           {/* wishlist + cart fold into the drawer below sm to protect the
-              icon priority order (hamburger → logo → search → bell → profile) */}
+              icon priority order (hamburger â†’ logo â†’ search â†’ bell â†’ profile) */}
           <Link
             href="/dashboard/wishlist"
             aria-label="Open wishlist"
@@ -538,14 +538,14 @@ export function Header() {
           <Link
             href="/dashboard/notifications"
             aria-label="Open notifications"
-            className="grid h-11 w-11 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:h-9 sm:w-9"
+            className="grid h-10 w-10 shrink-0 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:h-9 sm:w-9"
           >
             <Bell className="h-4 w-4" />
           </Link>
           <Link
             href={user ? "/dashboard" : "/signin"}
             aria-label={user ? "Open profile" : "Sign in"}
-            className="grid h-11 w-11 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:h-9 sm:w-9"
+            className="grid h-10 w-10 shrink-0 place-items-center border border-line text-white transition hover:border-accent hover:text-accent sm:h-9 sm:w-9"
           >
             <UserRound className="h-4 w-4" />
           </Link>
