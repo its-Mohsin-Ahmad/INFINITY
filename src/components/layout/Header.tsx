@@ -234,14 +234,19 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
         aria-label="Mobile navigation"
         aria-hidden={!open}
         className={clsx(
-          /* Glassy black sheet: translucent and blurred so the page behind stays
-             visible, outlined with a faint white edge and the system 20px
-             radius on the open side. */
-          "absolute inset-y-0 left-0 flex w-[86%] max-w-sm flex-col rounded-r-[20px] border-r border-white/10 bg-[#03060C]/85 shadow-[0_0_60px_rgba(0,0,0,0.65)] backdrop-blur-2xl transition duration-300",
+          /* Solid black glass: the sheet is fully opaque (no transparency), and
+             the glass character comes from a top sheen, a faint white edge and
+             the 20px system radius rather than from see-through. */
+          "absolute inset-y-0 left-0 flex w-[86%] max-w-sm flex-col rounded-r-[20px] border-r border-white/10 bg-[#03060C] shadow-[0_0_60px_rgba(0,0,0,0.75)] transition duration-300",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+        {/* glass sheen: a light wash at the top falling to black at the base */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-r-[20px] bg-gradient-to-b from-white/[0.07] via-transparent to-black/30"
+        />
+        <div className="relative flex items-center justify-between border-b border-white/10 px-4 py-3">
           <Logo />
           <button
             type="button"
@@ -253,11 +258,11 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
           </button>
         </div>
 
-        <div className="border-b border-white/10 p-4">
+        <div className="relative border-b border-white/10 p-4">
           <SearchField />
         </div>
 
-        <div className="flex-1 overscroll-contain overflow-y-auto p-4">
+        <div className="relative flex-1 overscroll-contain overflow-y-auto p-4">
           <ul className="space-y-1">
             {PRIMARY_NAV.map((item) => (
               <li key={item.label} className="border-b border-white/[0.07]">
@@ -311,7 +316,7 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
           </ul>
         </div>
 
-        <div className="space-y-2 border-t border-white/10 p-4">
+        <div className="relative space-y-2 border-t border-white/10 p-4">
           <Link
             href="/launcher"
             className="rounded-control flex items-center justify-center gap-2 bg-accent px-4 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white"
