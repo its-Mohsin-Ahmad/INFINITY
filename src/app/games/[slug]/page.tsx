@@ -23,6 +23,7 @@ import { AddToCartButton, CompareButton, WishlistButton } from "@/components/pla
 import { RecentlyViewedRail, ViewedTracker } from "@/components/player/recently-viewed";
 import { discountedPrice, slugify } from "@/lib/generate";
 import type { RequirementRow } from "@/lib/types";
+import { cartGame, wishlistGame } from "@/lib/catalogue/client-props";
 
 /* ===========================================================================
  * /games/[slug] — the game detail page
@@ -49,7 +50,9 @@ export const dynamicParams = false;
 type GamePageProps = { params: Promise<{ slug: string }> };
 
 /** slug -> title lookup for the client-side recently-viewed rail. */
-const TITLE_INDEX: Record<string, string> = Object.fromEntries(GAMES.map((g) => [g.slug, g.title]));
+// The rail only needs titles for games a reader could plausibly have seen
+// alongside this one, so the index is built from this page's own related
+// games. Shipping all 540 titles put ~24KB of dead JSON in every game page.
 
 export async function generateMetadata({ params }: GamePageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -406,11 +409,11 @@ export default async function GamePage({ params }: GamePageProps) {
               </div>
 
               <div className="mt-5">
-                <AddToCartButton game={game} className="w-full" />
+                <AddToCartButton game={cartGame(game)} className="w-full" />
               </div>
               <div className="mt-2 flex gap-2">
-                <WishlistButton game={game} variant="wide" className="flex-1" />
-                <CompareButton game={game} />
+                <WishlistButton game={wishlistGame(game)} variant="wide" className="flex-1" />
+                <CompareButton game={wishlistGame(game)} />
               </div>
 
               <p className="mt-4 border-t border-line pt-3 text-2xs leading-relaxed text-ink-muted">
@@ -455,7 +458,10 @@ export default async function GamePage({ params }: GamePageProps) {
             href={`/categories/${game.genre[0]}`}
             linkLabel={genres[0] ? `More ${genres[0]}` : "Browse all"}
           />
-          <RecentlyViewedRail titles={TITLE_INDEX} exclude={game.slug} />
+          <RecentlyViewedRail
+            titles={Object.fromEntries(similar.map((g) => [g.slug, g.title]))}
+            exclude={game.slug}
+          />
         </div>
       </div>
     </>

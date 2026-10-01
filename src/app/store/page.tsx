@@ -11,6 +11,7 @@ import { AddToCartButton } from "@/components/player/player-actions";
 import { GameCard } from "@/components/game/GameCard";
 import { discountedPrice } from "@/lib/generate";
 import type { GamePassPlan, PlatformSlug, PromoBanner, StoreProduct } from "@/lib/types";
+import { cartGame } from "@/lib/catalogue/client-props";
 
 /* ===========================================================================
  * /store — the storefront.
@@ -223,7 +224,7 @@ export default function StorePage() {
           {storePicks.map((g) => (
             <div key={g.slug} className="flex h-full flex-col gap-2">
               <GameCard game={g} className="h-full" showActions={false} />
-              <AddToCartButton game={g} />
+              <AddToCartButton game={cartGame(g)} />
             </div>
           ))}
         </div>

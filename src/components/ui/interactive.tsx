@@ -9,47 +9,37 @@ import { BrowseTabs } from "@/components/browse/browse-tabs";
  * Interactive building blocks (client components)
  * ======================================================================== */
 
-export function Carousel({
-  children,
-  className,
-  step = 320,
-  ariaLabel = "carousel",
-}: {
-  children: ReactNode;
-  className?: string;
-  step?: number;
-  ariaLabel?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
+/**
+ * Desktop-only arrows for a server-rendered Carousel. This is a SIBLING island:
+ * it finds the scroller by id and drives it with the DOM, so the rail's cards
+ * are never serialised across a client boundary (see ui/carousel.tsx).
+ */
+export function CarouselArrows({ targetId, step = 320 }: { targetId: string; step?: number }) {
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
-  const update = () => {
-    const el = ref.current;
-    if (!el) return;
-    setAtStart(el.scrollLeft <= 4);
-    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
-  };
-
   useEffect(() => {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    const update = () => {
+      setAtStart(el.scrollLeft <= 4);
+      setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
+    };
     update();
-  }, []);
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [targetId]);
 
   const scroll = (dir: 1 | -1) => {
-    ref.current?.scrollBy({ left: dir * step, behavior: "smooth" });
+    document.getElementById(targetId)?.scrollBy({ left: dir * step, behavior: "smooth" });
   };
 
   return (
-    <div className={clsx("group/carousel relative", className)}>
-      <div
-        ref={ref}
-        onScroll={update}
-        aria-label={ariaLabel}
-        className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth py-1.5 sm:gap-4"
-      >
-        {children}
-      </div>
-
+    <>
       <button
         type="button"
         aria-label="Scroll left"
@@ -68,12 +58,8 @@ export function Carousel({
       >
         <ChevronRight className="h-5 w-5" />
       </button>
-    </div>
+    </>
   );
-}
-
-export function CarouselItem({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={clsx("shrink-0 snap-start", className)}>{children}</div>;
 }
 
 /**

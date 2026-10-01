@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { Game } from "@/lib/types";
 import { GameCard } from "./GameCard";
 import type { CardVariant } from "./card-tokens";
-import { Carousel, CarouselItem } from "@/components/ui/interactive";
+import { Carousel, CarouselItem } from "@/components/ui/carousel";
 import { SectionHeading } from "@/components/ui/primitives";
 
 /* ===========================================================================
@@ -87,7 +87,7 @@ export function GameRow({
         linkLabel={linkLabel}
         action={action}
       />
-      <Carousel step={size === "sm" ? 200 : 260}>
+      <Carousel id={`shelf-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} step={size === "sm" ? 200 : 260}>
         {games.map((game, i) => (
           <CarouselItem key={game.slug} className={size === "sm" ? "w-[140px] sm:w-[168px]" : "w-[162px] sm:w-[212px]"}>
             <GameCard

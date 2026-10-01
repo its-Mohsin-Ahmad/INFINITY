@@ -8,6 +8,7 @@ import { Badge, PlatformPills, PriceTag, ScoreBadge } from "@/components/ui/prim
 import { AddToCartButton, WishlistButton } from "@/components/player/player-actions";
 import { genreName } from "@/data/taxonomy";
 import { compactNumber } from "@/lib/generate";
+import { cartGame, trailerGame, wishlistGame } from "@/lib/catalogue/client-props";
 import {
   CARD_ASPECT_CLASS,
   CARD_VARIANTS,
@@ -131,7 +132,7 @@ function CardCornerWishlist({ game, reveal }: { game: Game; reveal: boolean }) {
           : "opacity-100",
       )}
     >
-      <WishlistButton game={game} />
+      <WishlistButton game={wishlistGame(game)} />
     </div>
   );
 }
@@ -232,7 +233,7 @@ function CardArt({
                 <ArrowRight className="h-3.5 w-3.5 transition group-hover/cta:translate-x-0.5" />
               </Link>
               <TrailerButton
-                game={game}
+                game={trailerGame(game)}
                 videos={game.videos}
                 className="inline-flex items-center gap-1.5 rounded-control border border-white/25 bg-bg-deep/60 px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.14em] text-white backdrop-blur transition hover:border-accent"
               />
@@ -335,8 +336,8 @@ function CardActions({
   if (!wantsWishlist && !wantsCart) return null;
   return (
     <div className="relative z-30 flex flex-col gap-2">
-      {wantsCart ? <AddToCartButton game={game} className="w-full" /> : null}
-      {wantsWishlist ? <WishlistButton game={game} variant="wide" className="w-full" /> : null}
+      {wantsCart ? <AddToCartButton game={cartGame(game)} className="w-full" /> : null}
+      {wantsWishlist ? <WishlistButton game={wishlistGame(game)} variant="wide" className="w-full" /> : null}
     </div>
   );
 }

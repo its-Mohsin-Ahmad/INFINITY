@@ -11,6 +11,7 @@ import { TrailerButton } from "@/components/home/TrailerModal";
 import { WishlistButton } from "@/components/player/player-actions";
 import { genreName } from "@/data/taxonomy";
 import { compactNumber } from "@/lib/generate";
+import { trailerGame, wishlistGame } from "@/lib/catalogue/client-props";
 
 /* ===========================================================================
  * Hero carousel
@@ -250,13 +251,13 @@ export function HeroCarousel({ games }: { games: Game[] }) {
             </Link>
             {game.videos.length ? (
               <TrailerButton
-                game={game}
+                game={trailerGame(game)}
                 videos={game.videos}
                 className="inline-flex items-center gap-2 border border-line bg-bg-deep/40 px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white backdrop-blur transition hover:border-accent hover:text-accent"
               />
             ) : null}
             <div className="min-w-[190px] flex-1 sm:flex-none">
-              <WishlistButton game={game} variant="wide" />
+              <WishlistButton game={wishlistGame(game)} variant="wide" />
             </div>
             <div className="hidden border-l border-line pl-4 sm:block">
               <PriceTag

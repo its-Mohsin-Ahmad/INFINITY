@@ -12,6 +12,7 @@ import { COMMUNITY_BOARDS, COMMUNITY_GROUPS, COMMUNITY_POSTS } from "@/data/comm
 import { compactNumber, formatDate, timeAgo } from "@/lib/generate";
 import { genreName } from "@/data/taxonomy";
 import type { CommunityPost, NewsArticle } from "@/lib/types";
+import { trailerGame } from "@/lib/catalogue/client-props";
 
 /* ===========================================================================
  * Homepage bands
@@ -95,7 +96,7 @@ export function SpotlightBanner() {
             </Link>
             {game.videos.length ? (
               <TrailerButton
-                game={game}
+                game={trailerGame(game)}
                 videos={game.videos}
                 className="inline-flex items-center gap-2 border border-line bg-bg-deep/50 px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white backdrop-blur transition hover:border-accent hover:text-accent"
               />
