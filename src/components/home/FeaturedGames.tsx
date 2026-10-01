@@ -13,16 +13,16 @@ import type { Game } from "@/lib/types";
  *        ANCHOR    M-1    M-2        row 1
  *        (spans)   M-3    M-4        row 2
  *
- * At 1440px the anchor lands near 650×736 — several times the visual area of
- * a ~345×360 supporting card — so the composition immediately reads as
+ * At 1440px the anchor lands near 570×696 — several times the visual area of
+ * a ~310×340 supporting card — so the composition immediately reads as
  * art-directed hierarchy. Heights derive from the sizing tokens
  * (2 × --card-medium-height + the 1rem grid gap), so the system stays on its
  * defined scale rather than generating arbitrary pixels.
  *
- * Responsive: single column on phones (anchor first, 430px min-height),
- * sm gets the anchor full-width over a 2×2 cluster, lg unlocks the real
- * asymmetric grid. Hover lift lives on the card shell (transform only), so
- * neighbours never reflow.
+ * Responsive: phones get a 2-up grid (anchor full-width, then the four
+ * supporting cards as a 2×2 pair) with every tier one size step down
+ * (--card-*-mobile tokens), lg unlocks the real asymmetric grid. Hover lift
+ * lives on the card shell (transform only), so neighbours never reflow.
  * ======================================================================== */
 
 interface FeaturedSlot {
@@ -42,7 +42,7 @@ export function FeaturedGames() {
     {
       game: anchor,
       variant: "featured",
-      className: "sm:col-span-2 lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:row-span-2",
+      className: "col-span-2 lg:col-span-1 lg:col-start-1 lg:row-start-1 lg:row-span-2",
       eager: true,
     },
     { game: rest[0], variant: "medium", className: "lg:col-start-2 lg:row-start-1" },
@@ -60,7 +60,7 @@ export function FeaturedGames() {
         href="/games?sort=rating"
         linkLabel="View all"
       />
-      <div className="grid gap-4 sm:grid-cols-2 lg:h-[calc(var(--card-medium-height)*2+1rem)] lg:grid-cols-[1.9fr_1fr_1fr] lg:grid-rows-2">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:h-[calc(var(--card-medium-height)*2+1rem)] lg:grid-cols-[1.9fr_1fr_1fr] lg:grid-rows-2">
         {slots.map((slot) => (
           <GameCard
             key={slot.game.slug}

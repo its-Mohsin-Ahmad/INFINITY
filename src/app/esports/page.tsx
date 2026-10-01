@@ -223,7 +223,7 @@ export default function EsportsPage() {
       <div className="shell space-y-12 py-10">
         {/* ---------------------------------------------- featured event */}
         <section className="grid overflow-hidden border border-line bg-bg-card/50 lg:grid-cols-[1.4fr_1fr]">
-          <div className="relative min-h-[260px]">
+          <div className="relative min-h-[220px] sm:min-h-[260px]">
             {game ? (
               <ArtImage game={game} variant="wide" showTitle={false} className="absolute inset-0 h-full w-full" />
             ) : (

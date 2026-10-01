@@ -37,13 +37,19 @@
   --card-small-width: 164px;
   --card-small-height: 260px;
   --card-standard-width: 212px;
-  --card-standard-height: 310px;
+  --card-standard-height: 292px;
   --card-medium-width: 264px;
-  --card-medium-height: 380px;
+  --card-medium-height: 340px;
   --card-large-width: 460px;
-  --card-large-height: 400px;
-  --card-featured-width: 660px;
-  --card-featured-height: 430px;
+  --card-large-height: 340px;
+  --card-featured-width: 620px;
+  --card-featured-height: 400px;
+  /* Phones render every tier one step down: the mobile art floors and the
+     featured min-height below are roughly 70% of the desktop tokens, so a
+     card never fills a screen on a 320–430px viewport (§15, §39). */
+  --card-medium-art-mobile: 9.5rem;
+  --card-standard-art-mobile: 10.5rem;
+  --card-featured-height-mobile: 18rem;
   /* Height of the mobile bottom tab bar (§83) — content docks reserve it. */
   --bottomnav-h: 64px;
   /* Loaded from Google Fonts in app/layout.tsx with resilient system fallbacks

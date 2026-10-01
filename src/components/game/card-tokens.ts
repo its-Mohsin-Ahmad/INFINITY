@@ -1,4 +1,4 @@
-import type { Game } from "@/lib/types";
+﻿import type { Game } from "@/lib/types";
 import type { ArtVariant } from "@/components/art/art-scene";
 import { hashString } from "@/lib/generate";
 
@@ -180,7 +180,7 @@ export const CARD_VARIANTS: Record<CardVariant, CardVariantSpec> = {
     aspect: "portrait",
     stretch: false,
     minHeight: null,
-    title: "text-[13px] font-extrabold uppercase leading-[1.15] tracking-wide",
+    title: "line-clamp-1 text-xs font-extrabold uppercase leading-[1.15] tracking-wide sm:text-[13px]",
     meta: "text-2xs uppercase tracking-wider text-ink-muted line-clamp-1",
     metaDetail: "short",
     showTextBody: true,
@@ -200,7 +200,7 @@ export const CARD_VARIANTS: Record<CardVariant, CardVariantSpec> = {
     showCart: false,
     wishlist: "corner",
     wishlistReveal: false,
-    bodyPadding: "px-3 py-2.5",
+    bodyPadding: "px-2.5 py-2 sm:px-3 sm:py-2.5",
     overlayTitle: false,
     scrim: "bg-gradient-to-t from-bg-deep/60 to-transparent",
   },
@@ -211,8 +211,8 @@ export const CARD_VARIANTS: Record<CardVariant, CardVariantSpec> = {
     art: "poster",
     aspect: "portrait",
     stretch: true,
-    minHeight: "min-h-[13rem]",
-    title: "text-[15px] font-extrabold uppercase leading-[1.15] tracking-wide",
+    minHeight: "min-h-[var(--card-standard-art-mobile)] sm:min-h-[12rem]",
+    title: "line-clamp-1 text-[13px] font-extrabold uppercase leading-[1.15] tracking-wide sm:text-[15px]",
     meta: "text-2xs uppercase tracking-wider text-ink-secondary line-clamp-1",
     metaDetail: "short",
     showTextBody: true,
@@ -232,19 +232,19 @@ export const CARD_VARIANTS: Record<CardVariant, CardVariantSpec> = {
     showCart: false,
     wishlist: "corner",
     wishlistReveal: true,
-    bodyPadding: "px-3.5 py-3",
+    bodyPadding: "px-3 py-2.5 sm:px-3.5 sm:py-3",
     overlayTitle: false,
     scrim: "bg-gradient-to-t from-bg-deep/70 via-transparent to-transparent",
   },
 
-  /* Medium: a standard card that also carries a blurb (§3C, §41 3/4 art). */
+  /* Medium: a standard card that also carries a blurb (Â§3C, Â§41 3/4 art). */
   medium: {
     layout: "panel",
     art: "poster",
     aspect: "tall",
     stretch: true,
-    minHeight: "min-h-[12.5rem]",
-    title: "text-lg font-extrabold uppercase leading-[1.1] tracking-tight",
+    minHeight: "min-h-[var(--card-medium-art-mobile)] sm:min-h-[10.5rem]",
+    title: "line-clamp-1 text-[15px] font-extrabold uppercase leading-[1.15] tracking-tight sm:text-lg",
     meta: "text-2xs uppercase tracking-wider text-ink-secondary line-clamp-1",
     metaDetail: "short",
     showTextBody: true,
@@ -264,20 +264,20 @@ export const CARD_VARIANTS: Record<CardVariant, CardVariantSpec> = {
     showCart: false,
     wishlist: "corner",
     wishlistReveal: true,
-    bodyPadding: "px-4 py-3.5",
+    bodyPadding: "px-3 py-2.5 sm:px-4 sm:py-3.5",
     overlayTitle: false,
     scrim: "bg-gradient-to-t from-bg-deep/70 via-transparent to-transparent",
   },
 
-  /* Large: landscape artwork with the copy overlaid on it (§3D, §15).
+  /* Large: landscape artwork with the copy overlaid on it (Â§3D, Â§15).
      Density: title + genre line + description + platforms + rating + CTA. */
   large: {
     layout: "panel",
     art: "hero",
     aspect: "thumb",
     stretch: true,
-    minHeight: "min-h-[var(--card-large-height)]",
-    title: "text-xl font-extrabold uppercase leading-[1.08] tracking-tight",
+    minHeight: "min-h-[var(--card-featured-height-mobile)] sm:min-h-[var(--card-large-height)]",
+    title: "line-clamp-2 text-lg font-extrabold uppercase leading-[1.08] tracking-tight sm:text-xl",
     meta: "text-2xs uppercase tracking-[0.14em] text-ink-secondary line-clamp-1",
     metaDetail: "full",
     showTextBody: false,
@@ -297,21 +297,21 @@ export const CARD_VARIANTS: Record<CardVariant, CardVariantSpec> = {
     showCart: false,
     wishlist: "corner",
     wishlistReveal: true,
-    bodyPadding: "px-5 py-4",
+    bodyPadding: "px-4 py-3.5 sm:px-5 sm:py-4",
     overlayTitle: true,
     scrim: "bg-gradient-to-t from-bg-deep via-bg-deep/55 to-bg-deep/15",
   },
 
   /* Featured: the dominant card of the asymmetric homepage composition
-     (§3E, §44). 16:9 full-bleed art under a mini-hero overlay: title,
+     (Â§3E, Â§44). 16:9 full-bleed art under a mini-hero overlay: title,
      description, rating, platforms and the CTA pair. */
   featured: {
     layout: "band",
     art: "banner",
     aspect: "landscape",
     stretch: true,
-    minHeight: "min-h-[var(--card-featured-height)]",
-    title: "h-display text-3xl font-extrabold uppercase leading-[1.05] tracking-tight",
+    minHeight: "min-h-[var(--card-featured-height-mobile)] sm:min-h-[var(--card-featured-height)]",
+    title: "h-display line-clamp-2 text-2xl font-extrabold uppercase leading-[1.05] tracking-tight sm:text-3xl",
     meta: "text-2xs uppercase tracking-[0.16em] text-ink-secondary",
     metaDetail: "full",
     showTextBody: false,
@@ -331,7 +331,7 @@ export const CARD_VARIANTS: Record<CardVariant, CardVariantSpec> = {
     showCart: false,
     wishlist: "corner",
     wishlistReveal: true,
-    bodyPadding: "px-5 py-4",
+    bodyPadding: "px-4 py-3 sm:px-5 sm:py-4",
     overlayTitle: true,
     scrim: "bg-gradient-to-t from-bg-deep via-bg-deep/55 to-bg-deep/10",
   },
@@ -368,7 +368,7 @@ export const CARD_VARIANTS: Record<CardVariant, CardVariantSpec> = {
     scrim: "bg-gradient-to-t from-bg-deep via-bg-deep/45 to-bg-deep/20",
   },
 
-  /* Wide: a promotional band with a small caption row (§3G, §41 21:9 art). */
+  /* Wide: a promotional band with a small caption row (Â§3G, Â§41 21:9 art). */
   wide: {
     layout: "band",
     art: "hero",
@@ -552,7 +552,7 @@ if (process.env.NODE_ENV !== "production") {
     if (spec.stretch !== Boolean(spec.minHeight)) {
       // eslint-disable-next-line no-console
       console.warn(
-        `[card-tokens] "${key}": stretch=${spec.stretch} but minHeight=${spec.minHeight ?? "null"} — stretched cards need a baseline height.`,
+        `[card-tokens] "${key}": stretch=${spec.stretch} but minHeight=${spec.minHeight ?? "null"} â€” stretched cards need a baseline height.`,
       );
     }
   });

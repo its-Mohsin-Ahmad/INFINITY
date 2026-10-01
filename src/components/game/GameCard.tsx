@@ -55,8 +55,8 @@ export interface GameCardProps {
 
 const clamp: Record<CardVariantSpec["descriptionLines"], string> = {
   1: "line-clamp-1",
-  2: "line-clamp-2",
-  3: "line-clamp-3",
+  2: "line-clamp-1 sm:line-clamp-2",
+  3: "line-clamp-2 sm:line-clamp-3",
 };
 
 /** The secondary line under a title, or null when the variant has no meta. */

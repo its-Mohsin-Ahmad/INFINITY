@@ -36,7 +36,7 @@ export function GameGrid({
         : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6";
 
   return (
-    <div className={`grid gap-4 ${cols} ${className ?? ""}`}>
+    <div className={`grid gap-3 sm:gap-4 ${cols} ${className ?? ""}`}>
       {games.map((game, i) => (
         <GameCard
           key={game.slug}
@@ -89,7 +89,7 @@ export function GameRow({
       />
       <Carousel step={size === "sm" ? 200 : 260}>
         {games.map((game, i) => (
-          <CarouselItem key={game.slug} className={size === "sm" ? "w-[168px]" : "w-[212px]"}>
+          <CarouselItem key={game.slug} className={size === "sm" ? "w-[140px] sm:w-[168px]" : "w-[162px] sm:w-[212px]"}>
             <GameCard
               game={game}
               variant={variant}

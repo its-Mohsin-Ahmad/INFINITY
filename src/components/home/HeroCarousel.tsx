@@ -175,7 +175,7 @@ export function HeroCarousel({ games }: { games: Game[] }) {
 
       {/* 440px keeps the first screen below the header cinematic but phone-sized
           (§15: hero ~400–500px); it grows to the desktop stage from sm up. */}
-      <div className="shell relative flex min-h-[440px] flex-col justify-end pb-14 pt-24 xs:min-h-[500px] sm:min-h-[600px] lg:min-h-[680px] lg:pb-16 lg:pt-28">
+      <div className="shell relative flex min-h-[360px] flex-col justify-end pb-10 pt-20 xs:min-h-[420px] xs:pb-12 xs:pt-24 sm:min-h-[560px] sm:pb-14 sm:pt-24 lg:min-h-[680px] lg:pb-16 lg:pt-28">
         <div key={`${game.slug}-copy`} className="max-w-3xl animate-fade-up">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-2 border border-accent/60 bg-accent/15 px-2.5 py-1 font-display text-2xs font-bold uppercase tracking-[0.18em] text-white">

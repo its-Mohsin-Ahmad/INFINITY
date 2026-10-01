@@ -77,7 +77,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="shell space-y-10 py-8 sm:space-y-16 sm:py-12">
+      <div className="shell space-y-8 py-6 sm:space-y-16 sm:py-12">
         <PlatformDiscovery />
 
         <StatsBar />

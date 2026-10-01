@@ -465,7 +465,7 @@ export function GamePassBanner() {
         <div className="absolute inset-0 bg-gradient-to-t from-bg-deep/60 to-transparent" />
       </div>
 
-      <div className="relative flex min-h-[190px] flex-col justify-center gap-6 p-6 sm:min-h-[210px] sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:p-10">
+      <div className="relative flex min-h-[168px] flex-col justify-center gap-6 p-6 sm:min-h-[210px] sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:p-10">
         <div className="max-w-xl">
           <p className="eyebrow mb-2 flex items-center gap-2">
             <span className="text-base leading-none text-accent">∞</span>
