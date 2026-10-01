@@ -3,6 +3,7 @@ import { ArrowUpRight, Download, Radio, Ticket, Users } from "lucide-react";
 import { GENRES, PLATFORMS } from "@/data/taxonomy";
 import type { Genre } from "@/lib/types";
 import {
+  byGenre,
   genreDistribution,
   platformDistribution,
   releaseTrend,
@@ -11,6 +12,7 @@ import {
 } from "@/lib/catalogue/query";
 import { computeStats } from "@/lib/catalogue";
 import { Stat } from "@/components/ui/primitives";
+import { GameGrid } from "@/components/game/GameGrid";
 import { ProgressBar } from "@/components/ui/interactive";
 import { slugify } from "@/lib/generate";
 
@@ -293,3 +295,49 @@ export function PulseBoard() {
 
 
  
+
+/* ===========================================================================
+ * Explore the infinite (§45)
+ * -----------------------------------------------------------------------
+ * Category navigation chips over a structured, mostly-uniform catalogue
+ * grid — the calm counterpart to the asymmetric featured composition.
+ * Phones scroll the chip lane horizontally; the grid keeps the standard
+ * 2 → 3 → 4 column ladder used everywhere else.
+ * ========================================================================== */
+
+export function ExploreTheInfinite() {
+  const lanes = genreDistribution(undefined, 9);
+  if (!lanes.length) return null;
+
+  const chips = [
+    { label: "All games", href: "/games" },
+    ...lanes.map((d) => ({ label: d.label, href: `/categories/${d.label}` })),
+    { label: "More →", href: "/categories" },
+  ];
+
+  const games = byGenre(slugify(lanes[0].label), 8);
+  if (!games.length) return null;
+
+  return (
+    <section>
+      <div className="mb-5 border-b border-line pb-3">
+        <p className="eyebrow mb-1.5">Browse the catalogue</p>
+        <h2 className="section-title">Explore the infinite</h2>
+      </div>
+
+      <div className="no-scrollbar -mx-4 mb-5 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+        {chips.map((chip) => (
+          <Link
+            key={chip.label}
+            href={chip.href}
+            className="shrink-0 border border-line px-3 py-1.5 font-display text-2xs font-bold uppercase tracking-[0.12em] text-ink-secondary transition hover:border-accent hover:text-white"
+          >
+            {chip.label}
+          </Link>
+        ))}
+      </div>
+
+      <GameGrid games={games} columns={4} />
+    </section>
+  );
+}

@@ -31,6 +31,19 @@
   --radius-card: 20px;
   --radius-control: 20px;
   --radius-pill: 9999px;
+  /* Card sizing scale (§39–40) — one defined tier per variant, never a random
+     pixel height. The featured composition derives its desktop grid height
+     from the medium tier: 2 × --card-medium-height + 1rem gap. */
+  --card-small-width: 164px;
+  --card-small-height: 260px;
+  --card-standard-width: 212px;
+  --card-standard-height: 310px;
+  --card-medium-width: 264px;
+  --card-medium-height: 380px;
+  --card-large-width: 460px;
+  --card-large-height: 400px;
+  --card-featured-width: 660px;
+  --card-featured-height: 430px;
   /* Height of the mobile bottom tab bar (§83) — content docks reserve it. */
   --bottomnav-h: 64px;
   /* Loaded from Google Fonts in app/layout.tsx with resilient system fallbacks
@@ -165,7 +178,7 @@ article {
 
 @layer components {
   .shell {
-    @apply mx-auto w-full max-w-[1800px] px-4 sm:px-6 lg:px-8 xl:px-10;
+    @apply mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 xl:px-10;
   }
 
   /* Card / panel surface. Any bordered block that is a content container uses

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
-import { CommunityBand, EsportsBand, NewsBand, SpotlightBanner, StatsBar } from "@/components/home/HomeBands";
-import { EcosystemBand, GenreLaneGrid, PlatformDiscovery, PulseBoard } from "@/components/home/HomeSections";
+import { FeaturedGames } from "@/components/home/FeaturedGames";
+import { CommunityBand, EsportsBand, GamePassBanner, NewsBand, SpotlightBanner, StatsBar } from "@/components/home/HomeBands";
+import { EcosystemBand, ExploreTheInfinite, GenreLaneGrid, PlatformDiscovery, PulseBoard } from "@/components/home/HomeSections";
 import { GameGrid, GameRow, RankedGamesTable } from "@/components/game/GameGrid";
 import { Countdown } from "@/components/ui/interactive";
 import { NewsletterForm } from "@/components/player/player-actions";
@@ -88,17 +89,31 @@ export default function HomePage() {
           games={trending}
           href="/games"
           linkLabel="Browse all"
+          ranked
         />
+
+        {/* asymmetric anchor of the homepage: one dominant card + 2×2 support */}
+        <FeaturedGames />
 
         <SpotlightBanner />
 
-        <GameRow
-          eyebrow="Just landed"
-          title="New releases this window"
-          games={fresh}
-          href="/games?tab=new"
-          linkLabel="All new releases"
-        />
+        <section>
+          <div className="mb-5 flex items-end justify-between gap-3 border-b border-line pb-3">
+            <div>
+              <p className="eyebrow mb-1.5">Just landed</p>
+              <h2 className="section-title">New releases this window</h2>
+            </div>
+            <Link
+              href="/games?tab=new"
+              className="group inline-flex items-center gap-1 border border-line px-3 py-1.5 font-display text-2xs font-bold uppercase tracking-[0.14em] text-ink-secondary transition hover:border-accent hover:text-white"
+            >
+              All new releases
+              <ArrowUpRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </Link>
+          </div>
+          {/* medium tier (§31): a calmer, denser grid between the two rails */}
+          <GameGrid games={fresh.slice(0, 8)} columns={4} variant="medium" />
+        </section>
 
         <GameRow
           eyebrow="Everyone's playing"
@@ -135,6 +150,11 @@ export default function HomePage() {
           linkLabel="All deals"
           action={<Countdown to="2026-12-31T23:59:59Z" label="Sale ends in" />}
         />
+
+        {/* wide promo beat, then the calm catalogue grid (§31, §45) */}
+        <GamePassBanner />
+
+        <ExploreTheInfinite />
 
         <GenreLaneGrid limit={12} />
 

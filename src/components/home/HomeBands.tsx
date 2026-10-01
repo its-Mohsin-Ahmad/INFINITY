@@ -5,7 +5,7 @@ import { GameArt } from "@/components/art/GameArt";
 import { TrailerButton } from "@/components/home/TrailerModal";
 import { Badge, PlatformPills, PriceTag, SectionHeading } from "@/components/ui/primitives";
 import { computeStats } from "@/lib/catalogue";
-import { topRated } from "@/lib/catalogue/query";
+import { mostDownloaded, topRated } from "@/lib/catalogue/query";
 import { FEATURED_ARTICLE, NEWS_CATEGORY_MAP, trendingArticles } from "@/data/news";
 import { TEAM_BY_ID, nextEvent } from "@/data/esports";
 import { COMMUNITY_BOARDS, COMMUNITY_GROUPS, COMMUNITY_POSTS } from "@/data/community";
@@ -444,3 +444,60 @@ export function CommunityBand() {
     </section>
   );
 }
+
+/**
+ * Wide Game Pass promotion (§32) — 180–230px tall, almost full content
+ * width, deliberately NOT shaped like a game card: full-bleed art under a
+ * left-heavy gradient, membership headline, single LEARN MORE action.
+ */
+export function GamePassBanner() {
+  const game = mostDownloaded(1)[0];
+  if (!game) return null;
+
+  return (
+    <section
+      aria-label="INFINITY Game Pass"
+      className="relative isolate overflow-hidden rounded-card border border-accent/40 bg-bg-nav"
+    >
+      <div className="absolute inset-0 -z-10">
+        <ArtImage game={game} variant="wide" showTitle={false} className="h-full w-full object-cover opacity-55" />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg-deep via-bg-deep/85 to-bg-deep/25" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg-deep/60 to-transparent" />
+      </div>
+
+      <div className="relative flex min-h-[190px] flex-col justify-center gap-6 p-6 sm:min-h-[210px] sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:p-10">
+        <div className="max-w-xl">
+          <p className="eyebrow mb-2 flex items-center gap-2">
+            <span className="text-base leading-none text-accent">∞</span>
+            Infinity Game Pass
+          </p>
+          <h2 className="h-display text-2xl uppercase leading-none tracking-tight sm:text-3xl">
+            Hundreds of games.
+            <br className="hidden sm:block" /> One membership.
+          </h2>
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-ink-secondary">
+            One subscription unlocks the full INFINITY catalogue on every platform you own — new releases included,
+            cancel any time.
+          </p>
+        </div>
+
+        <div className="flex shrink-0 flex-wrap items-center gap-3">
+          <Link
+            href="/game-pass"
+            className="group inline-flex items-center gap-2 rounded-control bg-accent px-6 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+          >
+            Learn more
+            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+          </Link>
+          <span className="hidden border border-line bg-bg-card/70 px-4 py-3 font-display text-2xs font-bold uppercase tracking-[0.14em] text-ink-secondary backdrop-blur sm:inline-block">
+            Cancel any time
+          </span>
+        </div>
+      </div>
+
+      {/* decorative accent rule */}
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-accent via-accent/40 to-transparent" />
+    </section>
+  );
+}
+

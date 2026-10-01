@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Game } from "@/lib/types";
 import { GameCard } from "./GameCard";
+import type { CardVariant } from "./card-tokens";
 import { Carousel, CarouselItem } from "@/components/ui/interactive";
 import { SectionHeading } from "@/components/ui/primitives";
 
@@ -13,11 +14,17 @@ export function GameGrid({
   columns = 6,
   className,
   eager = false,
+  variant,
+  ranked = false,
 }: {
   games: Game[];
   columns?: 3 | 4 | 5 | 6;
   className?: string;
   eager?: boolean;
+  /** Composition token for every card in the grid (§58). Defaults to standard. */
+  variant?: CardVariant;
+  /** Number the cards 01, 02, 03… at the artwork's bottom-left (§12). */
+  ranked?: boolean;
 }) {
   const cols =
     columns === 3
@@ -31,7 +38,13 @@ export function GameGrid({
   return (
     <div className={`grid gap-4 ${cols} ${className ?? ""}`}>
       {games.map((game, i) => (
-        <GameCard key={game.slug} game={game} eager={eager && i < 6} />
+        <GameCard
+          key={game.slug}
+          game={game}
+          variant={variant}
+          rank={ranked ? i + 1 : undefined}
+          eager={eager && i < 6}
+        />
       ))}
     </div>
   );
@@ -47,6 +60,8 @@ export function GameRow({
   linkLabel,
   size = "md",
   action,
+  variant,
+  ranked = false,
 }: {
   title: string;
   eyebrow?: string;
@@ -56,6 +71,10 @@ export function GameRow({
   linkLabel?: string;
   size?: "sm" | "md";
   action?: ReactNode;
+  /** Composition token for every card on the shelf (§58). Defaults to standard. */
+  variant?: CardVariant;
+  /** Number the cards 01, 02, 03… at the artwork's bottom-left (§12). */
+  ranked?: boolean;
 }) {
   if (!games.length) return null;
   return (
@@ -69,9 +88,13 @@ export function GameRow({
         action={action}
       />
       <Carousel step={size === "sm" ? 200 : 260}>
-        {games.map((game) => (
+        {games.map((game, i) => (
           <CarouselItem key={game.slug} className={size === "sm" ? "w-[168px]" : "w-[212px]"}>
-            <GameCard game={game} />
+            <GameCard
+              game={game}
+              variant={variant}
+              rank={ranked ? i + 1 : undefined}
+            />
           </CarouselItem>
         ))}
       </Carousel>

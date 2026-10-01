@@ -1,5 +1,7 @@
 import Link from "next/link";
 import clsx from "clsx";
+import { ArrowRight } from "lucide-react";
+import { TrailerButton } from "@/components/home/TrailerModal";
 import type { Game } from "@/lib/types";
 import { ArtImage } from "@/components/art/ArtImage";
 import { Badge, PlatformPills, PriceTag, ScoreBadge } from "@/components/ui/primitives";
@@ -47,6 +49,8 @@ export interface GameCardProps {
   eager?: boolean;
   /** Secondary seed so two generated fallbacks of the same title differ. */
   index?: number;
+  /** Trending rank (§12): a red tab at the artwork's bottom-left, 01-based. */
+  rank?: number;
 }
 
 const clamp: Record<CardVariantSpec["descriptionLines"], string> = {
@@ -81,11 +85,31 @@ function CardBadges({ game, spec }: { game: Game; spec: CardVariantSpec }) {
   );
 }
 
-/** INFINITY score, top-right. */
-function CardScore({ game }: { game: Game }) {
+/**
+ * Rank badge + INFINITY score at the artwork's bottom-left (§12, §20).
+ * The rank is a red rectangular tab painted *inside* the frame — never
+ * outside the card — and the score chip sits beside it so both stay legible
+ * over bright artwork. Overlay variants carry their score in the overlay
+ * instead, so this cluster only shows the score when there is no overlay.
+ */
+function CardArtFooter({
+  game,
+  rank,
+  showScore,
+}: {
+  game: Game;
+  rank?: number;
+  showScore: boolean;
+}) {
+  if (!rank && !showScore) return null;
   return (
-    <div className="pointer-events-none absolute right-2.5 top-2.5 z-20">
-      <ScoreBadge rating={game.rating} />
+    <div className="pointer-events-none absolute bottom-0 left-0 z-20 flex items-center gap-1.5 p-2.5">
+      {rank ? (
+        <span className="bg-accent px-2 py-1 font-display text-[11px] font-extrabold leading-none tabular-nums text-white shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
+          {String(rank).padStart(2, "0")}
+        </span>
+      ) : null}
+      {showScore ? <ScoreBadge rating={game.rating} /> : null}
     </div>
   );
 }
@@ -98,9 +122,10 @@ function CardCornerWishlist({ game, reveal }: { game: Game; reveal: boolean }) {
   return (
     <div
       className={clsx(
-        "absolute bottom-2.5 right-2.5 z-30 transition-opacity duration-300 ease-premium",
+        "absolute right-2.5 top-2.5 z-30 transition duration-300 ease-premium hover:scale-110",
         reveal
-          ? "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+          ? /* touch devices have no hover — the heart stays exposed (§101) */
+            "opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
           : "opacity-100",
       )}
     >
@@ -118,6 +143,7 @@ function CardArt({
   index,
   fill = false,
   showActions,
+  rank,
 }: {
   game: Game;
   spec: CardVariantSpec;
@@ -127,6 +153,7 @@ function CardArt({
   /** Row layout: the art fills its column height instead of using its aspect. */
   fill?: boolean;
   showActions: boolean;
+  rank?: number;
 }) {
   const meta = metaLine(game, spec);
   return (
@@ -163,15 +190,14 @@ function CardArt({
       />
 
       <CardBadges game={game} spec={spec} />
-      {spec.showScore ? <CardScore game={game} /> : null}
+      <CardArtFooter
+        game={game}
+        rank={rank}
+        showScore={spec.showScore && !spec.overlayTitle}
+      />
 
       {spec.overlayTitle ? (
-        <div
-          className={clsx(
-            "pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col p-3",
-            showActions && spec.wishlist === "corner" && "pr-14",
-          )}
-        >
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col p-4">
           <h3
             className={clsx(
               "font-display text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] transition-colors duration-300 group-hover:text-accent",
@@ -180,7 +206,36 @@ function CardArt({
           >
             {game.title}
           </h3>
-          {meta ? <p className={clsx("mt-1", spec.meta)}>{meta}</p> : null}
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            {spec.showScore ? <ScoreBadge rating={game.rating} /> : null}
+            {meta ? <p className={clsx(spec.meta)}>{meta}</p> : null}
+          </div>
+          {spec.showDescription ? (
+            <p className="mt-2 line-clamp-2 max-w-2xl text-xs leading-relaxed text-ink-secondary sm:line-clamp-3">
+              {game.shortDescription}
+            </p>
+          ) : null}
+          {spec.showPlatforms ? (
+            <div className="mt-2.5">
+              <PlatformPills platforms={game.platforms} max={spec.platformMax} />
+            </div>
+          ) : null}
+          {showActions && spec.showCta ? (
+            <div className="pointer-events-auto mt-3.5 flex flex-wrap items-center gap-2">
+              <Link
+                href={`/games/${game.slug}`}
+                className="group/cta inline-flex items-center gap-1.5 rounded-control bg-accent px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-accent-bright"
+              >
+                {spec.ctaLabel || "View game"}
+                <ArrowRight className="h-3.5 w-3.5 transition group-hover/cta:translate-x-0.5" />
+              </Link>
+              <TrailerButton
+                game={game}
+                videos={game.videos}
+                className="inline-flex items-center gap-1.5 rounded-control border border-white/25 bg-bg-deep/60 px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.14em] text-white backdrop-blur transition hover:border-accent"
+              />
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -318,6 +373,7 @@ export function GameCard({
   focalPoint,
   eager = false,
   index = 0,
+  rank,
 }: GameCardProps) {
   const spec = CARD_VARIANTS[variant];
   const focal = focalPoint ?? focalPointFor(game, variant);
@@ -329,7 +385,7 @@ export function GameCard({
   const body = spec.showTextBody || hasBodyActions;
 
   const shell = clsx(
-    "group relative flex overflow-hidden rounded-card border border-line bg-bg-card/60 transition-colors duration-300 hover:border-accent/60 focus-within:border-accent/60 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent-bright",
+    "group relative flex overflow-hidden rounded-card border border-line bg-bg-card/60 transition duration-300 ease-out hover:-translate-y-[5px] hover:border-accent/60 hover:shadow-[0_10px_30px_rgba(0,0,0,0.45)] focus-within:border-accent/60 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent-bright motion-reduce:hover:translate-y-0",
     spec.stretch && "h-full",
     className,
   );
@@ -347,6 +403,7 @@ export function GameCard({
             index={index}
             fill
             showActions={showActions}
+            rank={rank}
           />
         </div>
 
@@ -371,7 +428,7 @@ export function GameCard({
   /* --- stacked layouts: tile / poster / panel / band / promo ------------ */
   return (
     <article className={clsx(shell, "flex-col")}>
-      <CardArt game={game} spec={spec} focal={focal} eager={eager} index={index} showActions={showActions} />
+      <CardArt game={game} spec={spec} focal={focal} eager={eager} index={index} showActions={showActions} rank={rank} />
 
       {body ? (
         <div className={clsx("relative flex flex-col gap-2.5", spec.bodyPadding)}>

@@ -44,7 +44,7 @@ export function Carousel({
         ref={ref}
         onScroll={update}
         aria-label={ariaLabel}
-        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-1"
+        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth py-1.5"
       >
         {children}
       </div>
