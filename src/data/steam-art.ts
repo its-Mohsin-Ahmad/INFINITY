@@ -209,6 +209,8 @@ export const STEAM_ART: Record<string, SteamArtEntry> = {
   "horizon-forbidden-west": { id: 2420110, poster: true, hero: true, header: true },
   "homeworld-3": { id: 1840080, poster: true, hero: true, header: true },
   "hellblade-senuas-sacrifice": { id: 414340, poster: true, hero: true, header: true },
+  "senuas-saga-hellblade-ii": { id: 2461850, poster: true, hero: true, header: true },
+  "the-lords-of-the-fallen": { id: 1501750, poster: true, hero: true, header: true },
   "horizon-zero-dawn-remastered": { id: 2561580, poster: true, hero: true, header: true },
   "hot-wheels-unleashed-2-turbocharged": { id: 2051120, poster: true, hero: true, header: true },
   "house-flipper-2": { id: 1190970, poster: true, hero: true, header: true },

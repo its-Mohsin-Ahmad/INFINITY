@@ -122,7 +122,9 @@ function CardCornerWishlist({ game, reveal }: { game: Game; reveal: boolean }) {
   return (
     <div
       className={clsx(
-        "absolute right-2.5 top-2.5 z-30 transition duration-300 ease-premium hover:scale-110",
+        /* after:-inset-2 keeps the visible 32px button but gives touch a
+           ~48px target, so the heart is comfortable on iOS and Android. */
+        "absolute right-2.5 top-2.5 z-30 transition duration-300 ease-premium after:absolute after:-inset-2 after:content-[''] hover:scale-110",
         reveal
           ? /* touch devices have no hover — the heart stays exposed (§101) */
             "opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"

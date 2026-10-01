@@ -35,21 +35,20 @@
      pixel height. The featured composition derives its desktop grid height
      from the medium tier: 2 × --card-medium-height + 1rem gap. */
   --card-small-width: 164px;
-  --card-small-height: 260px;
+  --card-small-height: 240px;
   --card-standard-width: 212px;
-  --card-standard-height: 292px;
+  --card-standard-height: 272px;
   --card-medium-width: 264px;
-  --card-medium-height: 340px;
+  --card-medium-height: 300px;
   --card-large-width: 460px;
-  --card-large-height: 340px;
+  --card-large-height: 300px;
   --card-featured-width: 620px;
-  --card-featured-height: 400px;
-  /* Phones render every tier one step down: the mobile art floors and the
-     featured min-height below are roughly 70% of the desktop tokens, so a
-     card never fills a screen on a 320–430px viewport (§15, §39). */
-  --card-medium-art-mobile: 9.5rem;
-  --card-standard-art-mobile: 10.5rem;
-  --card-featured-height-mobile: 18rem;
+  --card-featured-height: 340px;
+  /* Phones render every tier one size step down: these floors apply below `sm`,
+     so no card fills a 320–430px screen (§15, §39). */
+  --card-medium-art-mobile: 8.5rem;
+  --card-standard-art-mobile: 9.5rem;
+  --card-featured-height-mobile: 15rem;
   /* Height of the mobile bottom tab bar (§83) — content docks reserve it. */
   --bottomnav-h: 64px;
   /* Loaded from Google Fonts in app/layout.tsx with resilient system fallbacks

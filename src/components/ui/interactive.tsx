@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BrowseTabs } from "@/components/browse/browse-tabs";
 
 /* ===========================================================================
  * Interactive building blocks (client components)
@@ -75,6 +76,11 @@ export function CarouselItem({ children, className }: { children: ReactNode; cla
   return <div className={clsx("shrink-0 snap-start", className)}>{children}</div>;
 }
 
+/**
+ * Detail-page tabs. Delegates to BrowseTabs so every tab surface in the app
+ * shares one implementation (URL sync, per-tab panel keys, roving tabindex)
+ * instead of two copies that can drift apart.
+ */
 export function Tabs({
   tabs,
   initial = 0,
@@ -86,34 +92,7 @@ export function Tabs({
   className?: string;
   panelClassName?: string;
 }) {
-  const [active, setActive] = useState(initial);
-  return (
-    <div className={className}>
-      <div role="tablist" className="no-scrollbar flex gap-1 overflow-x-auto border-b border-line">
-        {tabs.map((tab, i) => (
-          <button
-            key={tab.id}
-            role="tab"
-            aria-selected={i === active}
-            onClick={() => setActive(i)}
-            className={clsx(
-              "relative shrink-0 px-4 py-3 font-display text-xs font-bold uppercase tracking-[0.14em] transition",
-              i === active ? "text-white" : "text-ink-muted hover:text-ink-secondary",
-            )}
-          >
-            <span className="inline-flex items-center gap-2">
-              {tab.label}
-              {tab.badge ? (
-                <span className="border border-line px-1.5 py-[1px] text-[10px] text-ink-secondary">{tab.badge}</span>
-              ) : null}
-            </span>
-            {i === active ? <span className="absolute inset-x-2 -bottom-px h-[2px] bg-accent" /> : null}
-          </button>
-        ))}
-      </div>
-      <div className={clsx("pt-5", panelClassName)}>{tabs[active]?.content}</div>
-    </div>
-  );
+  return <BrowseTabs tabs={tabs} initial={initial} className={className} panelClassName={panelClassName} />;
 }
 
 export function Accordion({

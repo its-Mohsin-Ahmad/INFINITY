@@ -243,7 +243,7 @@ export const CARD_VARIANTS: Record<CardVariant, CardVariantSpec> = {
     art: "poster",
     aspect: "tall",
     stretch: true,
-    minHeight: "min-h-[var(--card-medium-art-mobile)] sm:min-h-[10.5rem]",
+    minHeight: "min-h-[var(--card-medium-art-mobile)] sm:min-h-[9.5rem]",
     title: "line-clamp-1 text-[15px] font-extrabold uppercase leading-[1.15] tracking-tight sm:text-lg",
     meta: "text-2xs uppercase tracking-wider text-ink-secondary line-clamp-1",
     metaDetail: "short",
