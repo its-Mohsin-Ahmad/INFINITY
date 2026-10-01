@@ -146,7 +146,7 @@ function UtilityBar({ mounted }: { mounted: boolean }) {
 function DesktopNav({ items }: { items: NavItem[] }) {
   return (
     <nav aria-label="Primary" className="hidden items-stretch lg:flex">
-      {items.map((item) => (
+      {items.map((item, i) => (
         <div key={item.label} className="group relative flex items-center">
           <Link
             href={item.href}
@@ -160,7 +160,17 @@ function DesktopNav({ items }: { items: NavItem[] }) {
           </Link>
 
           {item.sections ? (
-            <div className="invisible absolute left-1/2 top-full z-50 w-[720px] -translate-x-1/2 translate-y-1 opacity-0 transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+            /* Anchored to its own trigger instead of centred on it: a centred
+               720px panel under "Games" started ~100px off the left edge of the
+               screen and ran the dropdown outside the site. Items in the right
+               half anchor right so neither end can escape the viewport, and the
+               width is capped so it always fits. */
+            <div
+              className={clsx(
+                "invisible absolute top-full z-50 w-[720px] max-w-[calc(100vw-2rem)] -translate-y-1 opacity-0 transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100",
+                i >= items.length / 2 ? "right-0" : "left-0",
+              )}
+            >
               <div className="grid grid-cols-3 gap-6 border border-line bg-bg-nav p-6 shadow-panel">
                 {item.sections.map((section) => (
                   <div key={section.title}>
@@ -192,7 +202,14 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
   const pathname = usePathname();
   const wishlist = usePlayer((s) => s.wishlist);
   const { count } = useCartTotals();
-  const [expanded, setExpanded] = useState<string | null>(null);
+  // Every group starts OPEN: a phone visitor should see the whole navigation
+  // without tapping to discover it. Tapping a header still collapses it.
+  const [expanded, setExpanded] = useState<string[]>(
+    PRIMARY_NAV.filter((item) => item.sections).map((item) => item.label),
+  );
+  const isOpen = (label: string) => expanded.includes(label);
+  const toggle = (label: string) =>
+    setExpanded((prev) => (prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]));
 
   useEffect(() => {
     onClose();
@@ -237,7 +254,7 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
           <SearchField />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overscroll-contain overflow-y-auto p-4">
           <ul className="space-y-1">
             {PRIMARY_NAV.map((item) => (
               <li key={item.label} className="border-b border-line-soft">
@@ -245,16 +262,16 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
                   <>
                     <button
                       type="button"
-                      onClick={() => setExpanded(expanded === item.label ? null : item.label)}
-                      aria-expanded={expanded === item.label}
+                      onClick={() => toggle(item.label)}
+                      aria-expanded={isOpen(item.label)}
                       className="flex w-full items-center justify-between py-3 font-display text-sm font-bold uppercase tracking-[0.1em] text-white"
                     >
                       {item.label}
                       <ChevronDown
-                        className={clsx("h-4 w-4 transition", expanded === item.label ? "rotate-180 text-accent" : "")}
+                        className={clsx("h-4 w-4 transition", isOpen(item.label) ? "rotate-180 text-accent" : "")}
                       />
                     </button>
-                    {expanded === item.label ? (
+                    {isOpen(item.label) ? (
                       <div className="pb-3 pl-3">
                         {item.sections.map((section) => (
                           <div key={section.title} className="mb-3">
