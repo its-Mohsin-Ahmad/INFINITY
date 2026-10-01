@@ -228,36 +228,39 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
       <div
         aria-hidden={!open}
         onClick={onClose}
-        className={clsx("absolute inset-0 bg-black/70 transition duration-300", open ? "opacity-100" : "opacity-0")}
+        className={clsx("absolute inset-0 bg-black/60 backdrop-blur-sm transition duration-300", open ? "opacity-100" : "opacity-0")}
       />
       <aside
         aria-label="Mobile navigation"
         aria-hidden={!open}
         className={clsx(
-          "absolute inset-y-0 left-0 flex w-[86%] max-w-sm flex-col border-r border-line bg-bg-nav transition duration-300",
+          /* Glassy black sheet: translucent and blurred so the page behind stays
+             visible, outlined with a faint white edge and the system 20px
+             radius on the open side. */
+          "absolute inset-y-0 left-0 flex w-[86%] max-w-sm flex-col rounded-r-[20px] border-r border-white/10 bg-[#03060C]/85 shadow-[0_0_60px_rgba(0,0,0,0.65)] backdrop-blur-2xl transition duration-300",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between border-b border-line px-4 py-3">
+        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
           <Logo />
           <button
             type="button"
             onClick={onClose}
             aria-label="Close navigation"
-            className="grid h-10 w-10 shrink-0 place-items-center border border-line text-white sm:h-9 sm:w-9"
+            className="grid h-10 w-10 shrink-0 place-items-center border border-white/15 text-white sm:h-9 sm:w-9"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="border-b border-line p-4">
+        <div className="border-b border-white/10 p-4">
           <SearchField />
         </div>
 
         <div className="flex-1 overscroll-contain overflow-y-auto p-4">
           <ul className="space-y-1">
             {PRIMARY_NAV.map((item) => (
-              <li key={item.label} className="border-b border-line-soft">
+              <li key={item.label} className="border-b border-white/[0.07]">
                 {item.sections ? (
                   <>
                     <button
@@ -308,7 +311,7 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
           </ul>
         </div>
 
-        <div className="space-y-2 border-t border-line p-4">
+        <div className="space-y-2 border-t border-white/10 p-4">
           <Link
             href="/launcher"
             className="rounded-control flex items-center justify-center gap-2 bg-accent px-4 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white"
