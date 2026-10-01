@@ -212,7 +212,7 @@ export default function CommunityPage() {
           </Link>
           <Link
             href="/news"
-            className="bg-accent px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+            className="rounded-control bg-accent px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
           >
             Read the news
           </Link>

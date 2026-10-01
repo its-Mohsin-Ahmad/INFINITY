@@ -19,6 +19,18 @@
   --line: #1d2935;
   --nav-h: 64px;
   --utility-h: 30px;
+
+  /* ==========================================================================
+     Radius — one value for the whole product.
+     Every card, panel, button, chip, field and dialog resolves to 20px. The
+     tokens exist so the number lives in exactly one place: card surfaces and
+     controls both read 20px, and `rounded-*` utilities are all repointed at
+     these variables in tailwind.config.ts, so no stray utility can reintroduce
+     a second radius language.
+     ========================================================================== */
+  --radius-card: 20px;
+  --radius-control: 20px;
+  --radius-pill: 9999px;
   /* Height of the mobile bottom tab bar (§83) — content docks reserve it. */
   --bottomnav-h: 64px;
   /* Loaded from Google Fonts in app/layout.tsx with resilient system fallbacks
@@ -88,7 +100,8 @@ body[data-scroll-locked="true"] {
 :focus-visible {
   outline: 2px solid var(--accent-bright);
   outline-offset: 2px;
-  border-radius: 2px;
+  /* No border-radius override here: the ring follows the element's own radius
+     (20px surfaces, 9999px circles), so it always matches the element shape. */
 }
 
 /* --- Scrollbars ---------------------------------------------------------- */
@@ -106,7 +119,7 @@ body[data-scroll-locked="true"] {
 ::-webkit-scrollbar-thumb {
   background: #22303d;
   border: 2px solid #050e17;
-  border-radius: 8px;
+  border-radius: var(--radius-card);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
@@ -120,9 +133,65 @@ body[data-scroll-locked="true"] {
 }
 
 /* --- Typographic utilities ---------------------------------------------- */
+/* --- Radius system (§radius) ---------------------------------------------
+   One radius for the whole product: 20px.
+
+   Tailwind v3 compiles its directives to plain CSS rather than native cascade
+   layers, so a utility class like `.rounded-none` would out-specify a bare
+   element selector below. This rule is the invariant, not a default: it is
+   marked important deliberately, so a stray utility can never punch a square
+   corner into a button or a card. Both tokens are 20px today; the separation
+   between `card` and `control` stays so surfaces and controls can be retuned
+   independently without touching a single component.
+
+   Anchors are deliberately absent from this list. Most links on the site are
+   inline text (breadcrumbs, footer, in-prose references) or carry a bottom
+   border (primary nav), and rounding those would either do nothing or curve
+   the underline. Anchor-based controls opt in with the `.control` class below.
+   ------------------------------------------------------------------------- */
+button,
+[role="button"],
+input,
+select,
+textarea {
+  border-radius: var(--radius-control) !important;
+}
+
+/* Card surfaces. `article` is the card shell for game, news and editorial
+   cards; non-article panels opt in with `rounded-card` / `.surface-card`. */
+article {
+  border-radius: var(--radius-card) !important;
+}
+
 @layer components {
   .shell {
     @apply mx-auto w-full max-w-[1800px] px-4 sm:px-6 lg:px-8 xl:px-10;
+  }
+
+  /* Card / panel surface. Any bordered block that is a content container uses
+     this rather than a literal `rounded-*` utility. */
+  .surface-card {
+    @apply rounded-card;
+  }
+
+  /* Boxed surfaces — the workhorse of the 20px invariant.
+     Any element carrying the all-sides `border` class is a box (card, chip,
+     panel, tray, dropdown, dialog) and takes the card radius, whichever
+     element type renders it — div, span, section or anchor-based control.
+     This rule lives in the components layer, which Tailwind compiles before
+     the utilities layer, so a deliberate `rounded-full` (counters, play
+     buttons, dots) still wins at equal specificity. Edge bands — `border-t` /
+     `border-b` header, footer, tab bar, section rules — never carry the plain
+     `border` class, so dividers and full-bleed strips stay square. */
+  [class~="border"] {
+    border-radius: var(--radius-card);
+  }
+
+  /* Anchor-based control (next/link styled as a button: CTAs, icon buttons,
+     chips). Native <button> is covered globally; anchors must opt in, because
+     most links on the site are inline text rather than controls. */
+  .control {
+    @apply rounded-control;
   }
 
   .eyebrow {
@@ -153,11 +222,11 @@ body[data-scroll-locked="true"] {
   }
 
   .panel {
-    @apply border border-line bg-bg-card/70 backdrop-blur-[2px];
+    @apply rounded-card border border-line bg-bg-card/70 backdrop-blur-[2px];
   }
 
   .field {
-    @apply w-full border border-line bg-bg-deep/80 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-ink-muted focus:border-accent focus:bg-bg-deep;
+    @apply w-full rounded-control border border-line bg-bg-deep/80 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-ink-muted focus:border-accent focus:bg-bg-deep;
   }
 
   .link-underline {

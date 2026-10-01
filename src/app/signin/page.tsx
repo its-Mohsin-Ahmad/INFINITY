@@ -51,7 +51,7 @@ export default function SignInPage() {
               </p>
               <Link
                 href="/dashboard"
-                className="flex min-h-[48px] w-full items-center justify-center bg-accent px-5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+                className="rounded-control flex min-h-[48px] w-full items-center justify-center bg-accent px-5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
               >
                 Go to dashboard
               </Link>

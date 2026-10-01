@@ -62,7 +62,7 @@ function ProductCard({
   };
 
   return (
-    <article className="flex h-full flex-col border border-line bg-bg-card/50 transition hover:border-accent/70">
+    <article className="flex h-full flex-col overflow-hidden border border-line bg-bg-card/50 transition hover:border-accent/70">
       <div className="relative aspect-[16/9] overflow-hidden border-b border-line">
         {href ? (
           <Link href={href} aria-label={name} className="block h-full w-full">
@@ -77,7 +77,7 @@ function ProductCard({
           <GameArt game={art} variant="wide" showTitle={false} className="h-full w-full" />
         )}
         {discount > 0 ? (
-          <span className="absolute right-3 top-3 bg-accent px-2 py-1 font-display text-2xs font-bold text-white">
+          <span className="rounded-control absolute right-3 top-3 bg-accent px-2 py-1 font-display text-2xs font-bold text-white">
             -{discount}%
           </span>
         ) : null}
@@ -110,7 +110,7 @@ function ProductCard({
           <div className="flex items-baseline gap-2">
             {discount > 0 ? (
               <>
-                <span className="bg-accent px-1.5 py-[2px] font-display text-2xs font-bold text-white">
+                <span className="rounded-control bg-accent px-1.5 py-[2px] font-display text-2xs font-bold text-white">
                   -{discount}%
                 </span>
                 <span className="text-xs text-ink-muted line-through">${price.toFixed(2)}</span>
@@ -337,7 +337,7 @@ export default function StorePage() {
               </Link>
               <Link
                 href="/games"
-                className="bg-accent px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+                className="rounded-control bg-accent px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
               >
                 Browse the catalogue
               </Link>

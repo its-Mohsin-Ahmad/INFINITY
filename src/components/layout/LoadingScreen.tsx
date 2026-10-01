@@ -262,7 +262,7 @@ function BootLockup({ pct }: { pct: number }) {
 
       {/* progress */}
       <div className="boot-rise mt-9 w-full" style={{ animationDelay: "460ms" }}>
-        <div className="relative h-[3px] w-full overflow-hidden bg-white/10">
+        <div className="relative h-[3px] w-full overflow-hidden rounded-control bg-white/10">
           <div
             className="relative h-full bg-gradient-to-r from-accent to-accent-bright transition-[width] duration-200 ease-out"
             style={{ width: `${pct}%` }}

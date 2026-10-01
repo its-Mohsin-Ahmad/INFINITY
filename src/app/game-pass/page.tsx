@@ -140,7 +140,7 @@ export default function GamePassPage() {
           </p>
           <Link
             href="/store"
-            className="flex min-h-[48px] items-center justify-center bg-accent px-6 font-display text-2xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+            className="rounded-control flex min-h-[48px] items-center justify-center bg-accent px-6 font-display text-2xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
           >
             Browse the store
           </Link>

@@ -43,10 +43,10 @@ type Status = "loading" | "ready" | "error";
 function SkeletonCard() {
   return (
     <div className="border border-line bg-bg-card/40">
-      <div className="aspect-[2/3] animate-pulse bg-bg-muted" />
+      <div className="aspect-[2/3] rounded-card animate-pulse bg-bg-muted" />
       <div className="space-y-2 p-3">
-        <div className="h-3 w-3/4 animate-pulse bg-bg-muted" />
-        <div className="h-3 w-1/2 animate-pulse bg-bg-muted" />
+        <div className="h-3 w-3/4 rounded-card animate-pulse bg-bg-muted" />
+        <div className="h-3 w-1/2 rounded-card animate-pulse bg-bg-muted" />
       </div>
     </div>
   );
@@ -164,7 +164,7 @@ function SearchWorkspace() {
       <div className="shell py-10">
         {status === "loading" ? (
           <>
-            <div className="mb-6 h-4 w-56 animate-pulse bg-bg-muted" />
+            <div className="mb-6 h-4 w-56 rounded-card animate-pulse bg-bg-muted" />
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {Array.from({ length: 12 }).map((_, i) => (
                 <SkeletonCard key={i} />
@@ -344,7 +344,7 @@ export default function SearchPage() {
     <Suspense
       fallback={
         <div className="shell py-16">
-          <div className="h-10 w-72 animate-pulse bg-bg-muted" />
+          <div className="h-10 w-72 rounded-card animate-pulse bg-bg-muted" />
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {Array.from({ length: 12 }).map((_, i) => (
               <SkeletonCard key={i} />

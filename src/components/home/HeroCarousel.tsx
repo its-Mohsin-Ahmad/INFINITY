@@ -243,7 +243,7 @@ export function HeroCarousel({ games }: { games: Game[] }) {
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Link
               href={`/games/${game.slug}`}
-              className="inline-flex items-center gap-2 bg-accent px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+              className="rounded-control inline-flex items-center gap-2 bg-accent px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
             >
               View game
               <ArrowRight className="h-4 w-4" />

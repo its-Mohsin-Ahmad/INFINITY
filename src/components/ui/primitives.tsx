@@ -131,7 +131,7 @@ export function PriceTag({
     <span className="inline-flex items-baseline gap-2">
       {discount > 0 ? (
         <>
-          <span className="bg-accent px-1.5 py-[2px] font-display text-2xs font-bold text-white">-{discount}%</span>
+          <span className="rounded-control bg-accent px-1.5 py-[2px] font-display text-2xs font-bold text-white">-{discount}%</span>
           <span className="text-xs text-ink-muted line-through">${price.toFixed(2)}</span>
         </>
       ) : null}
@@ -205,7 +205,7 @@ export function Stat({
 
 export function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={clsx("relative overflow-hidden bg-bg-muted/70", className)}>
+    <div className={clsx("relative overflow-hidden rounded-card bg-bg-muted/70", className)}>
       <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
     </div>
   );

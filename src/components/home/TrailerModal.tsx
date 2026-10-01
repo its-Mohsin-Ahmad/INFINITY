@@ -127,7 +127,7 @@ export function TrailerModal({
                   href={active.officialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-accent px-6 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+                  className="rounded-control inline-flex items-center gap-2 bg-accent px-6 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
                 >
                   Watch on {active.channel.replace(" (official)", "")}
                   <ExternalLink className="h-3.5 w-3.5" />

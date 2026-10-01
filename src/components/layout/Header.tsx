@@ -294,7 +294,7 @@ function MobileDrawer({ open, onClose, mounted }: { open: boolean; onClose: () =
         <div className="space-y-2 border-t border-line p-4">
           <Link
             href="/launcher"
-            className="flex items-center justify-center gap-2 bg-accent px-4 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white"
+            className="rounded-control flex items-center justify-center gap-2 bg-accent px-4 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white"
           >
             <Download className="h-4 w-4" />
             Install launcher
@@ -551,7 +551,7 @@ export function Header() {
           </Link>
           <Link
             href="/launcher"
-            className="hidden items-center gap-2 bg-accent px-4 py-2.5 font-display text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-accent-bright lg:flex"
+            className="rounded-control hidden items-center gap-2 bg-accent px-4 py-2.5 font-display text-xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-accent-bright lg:flex"
           >
             <Download className="h-4 w-4" />
             Launcher

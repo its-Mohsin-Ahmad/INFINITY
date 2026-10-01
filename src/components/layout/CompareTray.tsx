@@ -60,7 +60,7 @@ export function CompareTray() {
           </button>
           <Link
             href="/compare"
-            className="bg-accent px-4 py-1.5 font-display text-2xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-accent-bright"
+            className="rounded-control bg-accent px-4 py-1.5 font-display text-2xs font-bold uppercase tracking-[0.14em] text-white transition hover:bg-accent-bright"
           >
             Compare now
           </Link>

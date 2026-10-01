@@ -128,7 +128,7 @@ export default async function PlatformPage({ params }: Props) {
             </p>
             <Link
               href="/games"
-              className="mt-4 block bg-accent px-4 py-2.5 text-center font-display text-2xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+              className="mt-4 block rounded-control bg-accent px-4 py-2.5 text-center font-display text-2xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
             >
               Browse all games
             </Link>

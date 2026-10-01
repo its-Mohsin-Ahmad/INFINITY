@@ -49,10 +49,35 @@ const config: Config = {
       fontSize: {
         "2xs": ["0.6875rem", { lineHeight: "1rem" }],
       },
+      /**
+       * Radius is centralised: 20px everywhere. `card` is every card / surface,
+       * `control` is every button, chip and field. `full` is the only exception
+       * and is reserved for genuinely circular decoration (status dots, counters,
+       * planets in the splash) — never for a control surface.
+       */
       borderRadius: {
-        card: "6px",
-        panel: "10px",
-        pill: "999px",
+        card: "var(--radius-card)",
+        control: "var(--radius-control)",
+        panel: "var(--radius-card)",
+        pill: "var(--radius-control)",
+        // The whole scale resolves to the same token, so no stray `rounded-md`
+        // anywhere in the codebase can reintroduce a second radius language.
+        DEFAULT: "var(--radius-card)",
+        sm: "var(--radius-card)",
+        md: "var(--radius-card)",
+        lg: "var(--radius-card)",
+        xl: "var(--radius-card)",
+        "2xl": "var(--radius-card)",
+        "3xl": "var(--radius-card)",
+        "4xl": "var(--radius-card)",
+        "5xl": "var(--radius-card)",
+        "6xl": "var(--radius-card)",
+        "7xl": "var(--radius-card)",
+        "8xl": "var(--radius-card)",
+        "9xl": "var(--radius-card)",
+        "10xl": "var(--radius-card)",
+        "11xl": "var(--radius-card)",
+        full: "9999px",
       },
       boxShadow: {
         glow: "0 0 0 1px rgba(229,9,47,0.55), 0 10px 40px -12px rgba(229,9,47,0.55)",

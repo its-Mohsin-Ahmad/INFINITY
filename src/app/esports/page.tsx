@@ -291,7 +291,7 @@ export default function EsportsPage() {
           </Link>
           <Link
             href="/games"
-            className="bg-accent px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+            className="rounded-control bg-accent px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
           >
             Play the line-up
           </Link>

@@ -329,7 +329,7 @@ export function GameCard({
   const body = spec.showTextBody || hasBodyActions;
 
   const shell = clsx(
-    "group relative flex overflow-hidden border border-line bg-bg-card/60 transition-colors duration-300 hover:border-accent/60 focus-within:border-accent/60 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent-bright",
+    "group relative flex overflow-hidden rounded-card border border-line bg-bg-card/60 transition-colors duration-300 hover:border-accent/60 focus-within:border-accent/60 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent-bright",
     spec.stretch && "h-full",
     className,
   );
@@ -398,7 +398,7 @@ export function GameListRow({ game, index }: { game: Game; index?: number }) {
           {String(index + 1).padStart(2, "0")}
         </span>
       ) : null}
-      <div className="h-16 w-16 shrink-0 overflow-hidden border border-line">
+      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-card border border-line">
         <ArtImage game={game} variant="thumb" showTitle={false} className="h-full w-full" />
       </div>
       <div className="min-w-0 flex-1">
@@ -431,9 +431,9 @@ export function GameMiniTile({ game }: { game: Game }) {
   return (
     <Link
       href={`/games/${game.slug}`}
-      className="group flex items-center gap-3 border border-line bg-bg-card/40 p-2 transition hover:border-accent"
+      className="group flex items-center gap-3 overflow-hidden rounded-card border border-line bg-bg-card/40 p-2 transition hover:border-accent"
     >
-      <div className="h-12 w-12 shrink-0 overflow-hidden border border-line">
+      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-card border border-line">
         <ArtImage game={game} variant="thumb" showTitle={false} className="h-full w-full" />
       </div>
       <div className="min-w-0">

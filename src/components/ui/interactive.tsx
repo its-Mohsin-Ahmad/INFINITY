@@ -125,7 +125,7 @@ export function Accordion({
 }) {
   const [open, setOpen] = useState<string | null>(items[0]?.id ?? null);
   return (
-    <div className={clsx("divide-y divide-line border border-line", className)}>
+    <div className={clsx("divide-y divide-line overflow-hidden border border-line", className)}>
       {items.map((item) => {
         const isOpen = open === item.id;
         return (
@@ -211,7 +211,7 @@ export function ProgressBar({
           <span className="tabular-nums">{Math.round(pct)}%</span>
         </div>
       ) : null}
-      <div className="h-1.5 w-full bg-bg-muted">
+      <div className="h-1.5 w-full overflow-hidden rounded-control bg-bg-muted">
         <div
           className={clsx("h-full transition-all duration-700", tone === "accent" ? "bg-accent" : "bg-line-strong")}
           style={{ width: `${pct}%` }}
@@ -233,7 +233,7 @@ export function QuantityStepper({
   max?: number;
 }) {
   return (
-    <div className="inline-flex items-center border border-line">
+    <div className="inline-flex items-center overflow-hidden border border-line">
       <button
         type="button"
         aria-label="Decrease quantity"

@@ -35,7 +35,7 @@ export function StatsBar() {
   ];
 
   return (
-    <section aria-label="Catalogue scale" className="border border-line bg-line">
+    <section aria-label="Catalogue scale" className="overflow-hidden border border-line bg-line">
       <div className="grid grid-cols-2 gap-px sm:grid-cols-4 lg:grid-cols-6">
         {cells.map((cell) => (
           <div key={cell.label} className="flex items-center gap-3 bg-bg-nav px-4 py-4 lg:px-5">
@@ -88,7 +88,7 @@ export function SpotlightBanner() {
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
               href={`/games/${game.slug}`}
-              className="inline-flex items-center gap-2 bg-accent px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
+              className="rounded-control inline-flex items-center gap-2 bg-accent px-6 py-3.5 font-display text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-accent-bright"
             >
               View game
               <ArrowRight className="h-4 w-4" />
