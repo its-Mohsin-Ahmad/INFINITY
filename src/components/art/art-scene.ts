@@ -30,17 +30,34 @@ const RATIOS: Record<ArtVariant, [number, number]> = {
   banner: [1600, 400],
 };
 
-/** Silhouette motif chosen from the game's primary genre cluster. */
+/**
+ * Silhouette motif chosen from the game's primary genre cluster.
+ *
+ * Every genre in the taxonomy has to land somewhere distinctive: the art-less
+ * titles skew heavily console/mobile, and when half of them resolve to the same
+ * "skyline" the grid reads as broken rather than illustrated. Only the 21
+ * top-level genres from src/data/taxonomy.ts are ever present on a record, so
+ * the mapping deliberately keys off those and nothing else.
+ */
 export function motifFor(genres: string[]): string {
   const g = new Set(genres);
   if (g.has("racing")) return "road";
-  if (g.has("strategy")) return "grid";
   if (g.has("sports")) return "stadium";
   if (g.has("horror")) return "forest";
+  if (g.has("survival")) return "forest";
+  if (g.has("fighting")) return "arena";
+  if (g.has("strategy")) return "grid";
   if (g.has("mmorpg") || g.has("sandbox")) return "monolith";
   if (g.has("fps") || g.has("tps") || g.has("battle-royale")) return "skyline";
   if (g.has("open-world") || g.has("adventure")) return "ridge";
+  if (g.has("rpg")) return "spires";
+  if (g.has("simulation") || g.has("family")) return "meadow";
+  if (g.has("story")) return "ridge";
   if (g.has("indie") || g.has("puzzle")) return "crystal";
+  // "action" is a secondary tag on most of the catalogue, so it is matched last:
+  // an FPS or racing game also lists it, and letting it win early sent a third
+  // of the art-less grid to the colosseum.
+  if (g.has("action")) return "arena";
   return "skyline";
 }
 
@@ -83,6 +100,28 @@ function scene(w: number, h: number, rng: () => number, hue: number, uid: string
       } else if (motif === "forest" && kind < 0.5) {
         // conifer teeth
         d += ` L ${x + step * 0.5} ${peak} L ${x + step} ${baseY - amp * 0.08}`;
+      } else if (motif === "spires" && kind < 0.55) {
+        // gothic spires: tall, narrow towers with a pitched cap
+        const bw = step * 0.2;
+        const top = peak - amp * 0.45;
+        d += ` L ${x + step * 0.2} ${baseY - amp * 0.12} L ${x + step * 0.2 + bw * 0.5} ${top} L ${x + step * 0.2 + bw} ${baseY - amp * 0.12} L ${x + step * 0.2 + bw} ${baseY}`;
+        x += step * 0.2 + bw;
+        d += ` L ${x} ${baseY}`;
+      } else if (motif === "arena" && kind < 0.5) {
+        // colosseum tiers: wide stepped blocks, broken by gaps
+        const bw = step * 0.42;
+        const top = baseY - amp * (0.3 + rng() * 0.34);
+        d += ` L ${x + step * 0.16} ${top} L ${x + step * 0.16 + bw} ${top} L ${x + step * 0.16 + bw} ${baseY}`;
+        x += step * 0.16 + bw;
+        d += ` L ${x} ${baseY}`;
+      } else if (motif === "meadow" && kind < 0.62) {
+        // long rolling hills, with the occasional tree or pylon
+        if (kind < 0.2) {
+          const tw = step * 0.1;
+          d += ` L ${x + step * 0.4 - tw * 0.5} ${baseY - amp * 0.12} L ${x + step * 0.4 - tw * 0.5} ${peak} L ${x + step * 0.4 + tw * 0.5} ${peak} L ${x + step * 0.4 + tw * 0.5} ${baseY - amp * 0.12} L ${x + step * 0.4 + tw * 0.9} ${baseY - amp * 0.06}`;
+        } else {
+          d += ` L ${x + step * 0.5} ${baseY - amp * 0.42} L ${x + step} ${baseY - amp * 0.08}`;
+        }
       } else {
         d += ` L ${x + step * 0.5} ${peak} L ${x + step} ${baseY - amp * 0.12 * rng()}`;
       }
@@ -202,6 +241,52 @@ function dressing(motif: string, w: number, h: number, hue: number, ink: string)
           `<rect x="${w * 0.07 + i * w * 0.089}" y="${h * 0.84 - hh}" width="${w * 0.042}" height="${hh}" fill="${ink}" opacity="0.9"/>`,
         );
       }
+      break;
+    case "spires":
+      // A ring of lit windows climbing the tallest spire reads as a fortress
+      // rather than a row of towers.
+      {
+        const cx = w * 0.5;
+        const top = h * 0.3;
+        for (let i = 0; i < 7; i++) {
+          const y = top + i * h * 0.045;
+          const ww = w * 0.008;
+          p.push(
+            `<rect x="${(cx - ww / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${ww.toFixed(1)}" height="${(ww * 1.8).toFixed(1)}" fill="#FFFFFF" opacity="${(0.3 - i * 0.03).toFixed(2)}"/>`,
+          );
+        }
+        p.push(
+          `<path d="M ${w * 0.5} ${top - h * 0.075} L ${w * 0.5} ${top - h * 0.02}" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="${Math.max(1, w * 0.003).toFixed(2)}"/>`,
+        );
+      }
+      break;
+    case "arena":
+      // Tiered stand with a lit arch at the centre: the fighting-coliseum cue.
+      p.push(
+        `<path d="M ${w * 0.08} ${h * 0.86} Q ${w * 0.5} ${h * 0.62} ${w * 0.92} ${h * 0.86} L ${w * 0.92} ${h} L ${w * 0.08} ${h} Z" fill="${ink}" opacity="0.9"/>`,
+      );
+      p.push(
+        `<path d="M ${w * 0.08} ${h * 0.86} Q ${w * 0.5} ${h * 0.62} ${w * 0.92} ${h * 0.86}" fill="none" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="${Math.max(1, w * 0.003).toFixed(2)}"/>`,
+      );
+      p.push(
+        `<path d="M ${w * 0.44} ${h * 0.86} L ${w * 0.44} ${h * 0.74} Q ${w * 0.5} ${h * 0.69} ${w * 0.56} ${h * 0.74} L ${w * 0.56} ${h * 0.86} Z" fill="hsl(${hue} 90% 60%)" opacity="0.3"/>`,
+      );
+      break;
+    case "meadow":
+      // Fence posts receding to the horizon: a calm, pastoral counterweight to
+      // the hard skyline the other motifs use.
+      for (let i = 0; i < 9; i++) {
+        const t = i / 8;
+        const x = w * (0.06 + t * 0.88);
+        const ph = h * (0.05 + t * 0.07);
+        const base = h * (0.9 - t * 0.03);
+        p.push(
+          `<rect x="${x.toFixed(1)}" y="${(base - ph).toFixed(1)}" width="${(w * 0.006).toFixed(1)}" height="${ph.toFixed(1)}" fill="${ink}" opacity="${(0.55 + t * 0.3).toFixed(2)}"/>`,
+        );
+      }
+      p.push(
+        `<path d="M ${w * 0.06} ${h * 0.868} L ${w * 0.94} ${h * 0.833}" stroke="${ink}" stroke-opacity="0.75" stroke-width="${Math.max(1, w * 0.004).toFixed(2)}"/>`,
+      );
       break;
     default:
       break;
