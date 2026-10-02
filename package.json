@@ -13,7 +13,8 @@
     "check:links": "node scripts/check-links.mjs",
     "verify": "node scripts/verify-database.mjs",
     "index:search": "node scripts/generate-search-index.mjs",
-    "fetch:art": "node scripts/fetch-steam-art.mjs"
+    "fetch:art": "node scripts/fetch-steam-art.mjs",
+    "fetch:store-art": "node scripts/fetch-store-art.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

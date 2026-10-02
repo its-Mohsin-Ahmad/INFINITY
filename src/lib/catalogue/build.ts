@@ -10,6 +10,7 @@ import type {
 import type { RawGameRow } from "@/data/game-records";
 import { GENRE_MAP, PLATFORM_MAP, SUBGENRE_MAP } from "@/data/taxonomy";
 import { steamArtFor } from "@/data/steam-art";
+import { STORE_ART, STORE_ART_ENABLED } from "@/data/store-art";
 import {
   hashString,
   seededInt,
@@ -417,8 +418,15 @@ export function buildGame(row: RawGameRow): Game {
   const vids = videosFor(row, slug, row.publisher);
   const primaryGenre = row.genres[0] ?? "action";
   // Real box art when the resolver matched a storefront entry, else null so
-  // the UI falls back to the generated key-art engine.
+  // the UI falls back to the generated key-art engine. Steam is consulted first;
+  // STORE_ART covers the titles that are not on Steam at all (console exclusives,
+  // mobile and free-to-play), which is the majority of what is left.
   const art = steamArtFor(slug);
+  const storeArt = art ? null : STORE_ART_ENABLED ? STORE_ART[slug] : undefined;
+  // Steam entries expose poster/hero/header; STORE_ART entries carry explicit
+  // URLs. Normalise both to one shape so the record assignment stays simple.
+  const poster = art?.poster ?? storeArt?.posterUrl ?? null;
+  const header = art?.header ?? storeArt?.headerUrl ?? null;
 
   const availability: PlatformAvailability[] = row.platforms.map((platform) => {
     const store = officialStoreUrl(platform, row.title);
@@ -448,9 +456,9 @@ export function buildGame(row: RawGameRow): Game {
     slug,
     shortDescription: shortDescriptionFor(row, slug),
     longDescription: long.join("\n\n"),
-    coverImage: art?.poster ?? null,
+    coverImage: poster,
     heroImage: art?.hero ?? null,
-    headerImage: art?.header ?? null,
+    headerImage: header,
     screenshots: shots,
     videos: vids,
     genre: row.genres,
